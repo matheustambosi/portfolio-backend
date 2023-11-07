@@ -1,8 +1,10 @@
 ﻿using AtletiGo.Core.Entities;
+using AtletiGo.Core.Exceptions;
 using AtletiGo.Core.Services.Atletica;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 
 namespace AtletiGo.Controllers
@@ -24,17 +26,41 @@ namespace AtletiGo.Controllers
         [HttpPost]
         public IActionResult CriarAtletica(Atletica atletica)
         {
-            _atleticaService.Insert(atletica);
+            try
+            {
+                _atleticaService.Insert(atletica);
 
-            return Ok();
+                return Ok();
+            }
+            catch (AtletiGoException atEx)
+            {
+                return BadRequest(atEx.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest("Erro desconhecido");
+            }
         }
 
         [HttpGet]
         public ActionResult<IEnumerable<Atletica>> GetAll()
         {
-            var response = _atleticaService.GetAll();
+            try
+            {
+                var response = _atleticaService.GetAll();
 
-            return Ok(response);
+                return Ok(response);
+            }
+            catch (AtletiGoException atEx)
+            {
+                return BadRequest(atEx.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest("Erro desconhecido");
+            }
         }
     }
 }

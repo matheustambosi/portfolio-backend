@@ -1,4 +1,5 @@
 ﻿using AtletiGo.Core.Entities;
+using AtletiGo.Core.Exceptions;
 using AtletiGo.Core.Messaging.QRCode;
 using AtletiGo.Core.Services.QRCode;
 using AtletiGo.Core.Utils.Enums;
@@ -28,25 +29,61 @@ namespace AtletiGo.Controllers
         [HttpGet]
         public ActionResult<List<QRCode>> ListarQRCodes()
         {
-            return _qrCodeService.Listar();
+            try
+            {
+                return _qrCodeService.Listar();
+            }
+            catch (AtletiGoException atEx)
+            {
+                return BadRequest(atEx.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest("Erro desconhecido");
+            }
         }
 
         [HttpPost]
         public IActionResult CriarQRCode(CriarQRCodeRequest request)
         {
-            var codigoAtletica = GetCodigoAtletica();
+            try
+            {
+                var codigoAtletica = GetCodigoAtletica();
 
-            var codigoQRCode = _qrCodeService.CriarQRCode(request, codigoAtletica);
+                var codigoQRCode = _qrCodeService.CriarQRCode(request, codigoAtletica);
 
-            return Ok(codigoQRCode);
+                return Ok(codigoQRCode);
+            }
+            catch (AtletiGoException atEx)
+            {
+                return BadRequest(atEx.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest("Erro desconhecido");
+            }
         }
 
         [HttpDelete("{codigo}")]
         public IActionResult InativarQRCode(Guid codigo)
         {
-            _qrCodeService.InativarQRCode(codigo);
+            try
+            {
+                _qrCodeService.InativarQRCode(codigo);
 
-            return NoContent();
+                return NoContent();
+            }
+            catch (AtletiGoException atEx)
+            {
+                return BadRequest(atEx.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest("Erro desconhecido");
+            }
         }
     }
 }
