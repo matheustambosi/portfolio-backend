@@ -4,7 +4,6 @@
     {
         Nenhum = 0,
         Universitario = 1,
-        Atleta = 2,
-        Administrador = 3
+        Representante = 2
     }
 }

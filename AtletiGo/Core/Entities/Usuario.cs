@@ -17,6 +17,12 @@ namespace AtletiGo.Core.Entities
         [Column("nome")]
         public string Nome { get; set; }
 
+        [Column("hash_senha")]
+        public string HashSenha { get; set; }
+
+        [Column("email")]
+        public string Email { get; set; }
+
         [Column("tipousuario")]
         public TipoUsuario TipoUsuario { get; set; }
 

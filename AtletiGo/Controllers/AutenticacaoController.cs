@@ -52,6 +52,8 @@ namespace AtletiGo.Controllers
         {
             try
             {
+                _usuarioService.CadastrarUsuario(request);
+
                 return Ok();
             }
             catch (AtletiGoException atEx)

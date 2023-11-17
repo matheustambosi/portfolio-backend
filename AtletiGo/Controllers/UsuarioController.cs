@@ -1,5 +1,6 @@
 ﻿using AtletiGo.Core.Entities;
 using AtletiGo.Core.Exceptions;
+using AtletiGo.Core.Messaging.Autenticacao;
 using AtletiGo.Core.Services.QRCode;
 using AtletiGo.Core.Services.Usuario;
 using Microsoft.AspNetCore.Authorization;
@@ -28,11 +29,13 @@ namespace AtletiGo.Controllers
         }
 
         [HttpPost]
-        public IActionResult CriarUsuario(Usuario usuario)
+        public IActionResult CriarUsuario(CadastroRequest request)
         {
             try
             {
-                _usuarioService.Insert(usuario);
+                var codigoAtletica = GetCodigoAtletica();
+
+                _usuarioService.CadastrarUsuario(request, codigoAtletica);
 
                 return Ok();
             }

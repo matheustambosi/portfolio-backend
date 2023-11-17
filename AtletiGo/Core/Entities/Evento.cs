@@ -21,6 +21,7 @@ namespace AtletiGo.Core.Entities
 
         [Column("enderecoevento")]
         public string EnderecoEvento { get; set; }
+        public bool MostrarTodos { get; set; }
 
         [Column("dtcriacao")]
         public DateTime DtCriacao { get; set; }

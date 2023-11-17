@@ -11,7 +11,7 @@ using System.Collections.Generic;
 
 namespace AtletiGo.Controllers
 {
-    [Authorize(Roles = nameof(TipoUsuario.Administrador))]
+    [Authorize(Roles = nameof(TipoUsuario.Representante))]
     [ApiController]
     [Route("[controller]")]
     public class QRCodeController : ControllerBase

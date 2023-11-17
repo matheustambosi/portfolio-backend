@@ -1,7 +1,13 @@
-﻿using AtletiGo.Core.Repositories.Usuario;
+﻿using AtletiGo.Core.Messaging.Autenticacao;
+using AtletiGo.Core.Repositories.Usuario;
 using AtletiGo.Core.Services.Autenticacao;
+using AtletiGo.Core.Utils.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Security.Principal;
+using BC = BCrypt.Net.BCrypt;
 
 namespace AtletiGo.Core.Services.Usuario
 {
@@ -19,23 +25,42 @@ namespace AtletiGo.Core.Services.Usuario
             return _usuarioRepository.GetAll<Entities.Usuario>()?.ToList();
         }
 
-        public void Insert(Entities.Usuario entity)
+        public void CadastrarUsuario (CadastroRequest request, Guid? codigoAtletica = null)
         {
-            _usuarioRepository.Insert(entity);
+            request.Validar();
+
+            var usuario = new Entities.Usuario
+            {
+                Codigo = Guid.NewGuid(),
+                CodigoAtletica = codigoAtletica ?? null,
+                Nome = request.Nome,
+                Email = request.Email,
+                HashSenha = BC.HashPassword(request.Senha),
+                TipoUsuario = TipoUsuario.Nenhum,
+                DtCriacao = DateTime.Now,
+                DtAlteracao = DateTime.Now
+            };
+
+            _usuarioRepository.Insert(usuario);
         }
 
-        public string Autenticar(string usuario, string senha)
+        public LoginResponse Autenticar(string nome, string senha)
         {
-            // Validar usuario e senha
+            var usuario = _usuarioRepository.GetAll<Entities.Usuario>(new { Nome = nome }).FirstOrDefault();
 
-            var token = TokenService.GenerateToken(new Entities.Usuario
+            if (usuario is null || !BC.Verify(senha, usuario.HashSenha))
             {
-                Nome = usuario,
-                TipoUsuario = Utils.Enums.TipoUsuario.Universitario,
-                CodigoAtletica = null
-            });
+                var token = TokenService.GenerateToken(new Entities.Usuario
+                {
+                    Nome = usuario.Nome,
+                    TipoUsuario = Utils.Enums.TipoUsuario.Universitario,
+                    CodigoAtletica = null
+                });
 
-            return token;
+                return new LoginResponse(usuario, token);
+            }
+
+            return null;
         }
     }
 }
