@@ -5,20 +5,19 @@ namespace AtletiGo.Controllers
 {
     public class ControllerBase : Microsoft.AspNetCore.Mvc.ControllerBase
     {
-        protected Guid GetCodigoAtletica()
+        protected Guid? GetCodigoAtletica()
         {
             var codigoAtletica = User.FindFirstValue("codigo_atletica");
-            if (codigoAtletica == null)
-            {
-                throw new Exception("Código da atlética não identificado.");
-            }
 
-            return new Guid(codigoAtletica);
+            if (!string.IsNullOrWhiteSpace(codigoAtletica))
+                return new Guid(codigoAtletica);
+
+            return null;
         }
 
         protected Guid GetCodigoUsuario()
         {
-            var codigoOperador = User.FindFirstValue("codigo_usuario");
+            var codigoOperador = User.FindFirstValue("codigo_operador");
             if (codigoOperador == null)
             {
                 throw new Exception("Código do usuário não identificado.");

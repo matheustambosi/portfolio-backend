@@ -1,5 +1,7 @@
 ﻿using AtletiGo.Core.Entities;
 using AtletiGo.Core.Exceptions;
+using AtletiGo.Core.Messaging;
+using AtletiGo.Core.Messaging.Atletica;
 using AtletiGo.Core.Services.Atletica;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,22 +26,22 @@ namespace AtletiGo.Controllers
         }
 
         [HttpPost]
-        public IActionResult CriarAtletica(Atletica atletica)
+        public IActionResult CriarAtletica(CriarAtleticaRequest request)
         {
             try
             {
-                _atleticaService.Insert(atletica);
+                _atleticaService.CadastrarAtletica(request);
 
-                return Ok();
+                return NoContent();
             }
             catch (AtletiGoException atEx)
             {
-                return BadRequest(atEx.Message);
+                return BadRequest(ResponseBase.ErroAtletiGo(atEx));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
-                return BadRequest("Erro desconhecido");
+                return BadRequest(ResponseBase.ErroGenerico());
             }
         }
 
@@ -54,12 +56,52 @@ namespace AtletiGo.Controllers
             }
             catch (AtletiGoException atEx)
             {
-                return BadRequest(atEx.Message);
+                return BadRequest(ResponseBase.ErroAtletiGo(atEx));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
-                return BadRequest("Erro desconhecido");
+                return BadRequest(ResponseBase.ErroGenerico());
+            }
+        }
+
+        [HttpPut("{codigo}")]
+        public IActionResult Editar([FromBody] CriarAtleticaRequest request, Guid codigo)
+        {
+            try
+            {
+                _atleticaService.EditarAtletica(codigo, request);
+
+                return NoContent();
+            }
+            catch (AtletiGoException atEx)
+            {
+                return BadRequest(ResponseBase.ErroAtletiGo(atEx));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest(ResponseBase.ErroGenerico());
+            }
+        }
+
+        [HttpDelete("{codigo}")]
+        public IActionResult Delete(Guid codigo)
+        {
+            try
+            {
+                _atleticaService.DesativarAtletica(codigo);
+
+                return NoContent();
+            }
+            catch (AtletiGoException atEx)
+            {
+                return BadRequest(ResponseBase.ErroAtletiGo(atEx));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest(ResponseBase.ErroGenerico());
             }
         }
     }

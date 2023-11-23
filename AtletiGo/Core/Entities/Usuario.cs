@@ -1,4 +1,6 @@
-﻿using AtletiGo.Core.Utils.Enums;
+﻿using AtletiGo.Core.Messaging.Atletica;
+using AtletiGo.Core.Messaging.Usuario;
+using AtletiGo.Core.Utils.Enums;
 using Dapper;
 using System;
 
@@ -17,7 +19,7 @@ namespace AtletiGo.Core.Entities
         [Column("nome")]
         public string Nome { get; set; }
 
-        [Column("hash_senha")]
+        [Column("hashsenha")]
         public string HashSenha { get; set; }
 
         [Column("email")]
@@ -31,5 +33,13 @@ namespace AtletiGo.Core.Entities
 
         [Column("dtalteracao")]
         public DateTime DtAlteracao { get; set; }
+
+        public void AlterarUsuario(CadastroUsuarioRequest request)
+        {
+            Nome = request.Nome;
+            Email = request.Email;
+            TipoUsuario = request.TipoUsuario;
+            DtAlteracao = DateTime.Now;
+        }
     }
 }

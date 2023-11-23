@@ -15,6 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System;
 using System.Text;
 
 namespace AtletiGo
@@ -113,9 +114,10 @@ namespace AtletiGo
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "AtletiGo");
             });
 
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
             SimpleCRUD.SetDialect(SimpleCRUD.Dialect.PostgreSQL);
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
 
             app.UseRouting();
 

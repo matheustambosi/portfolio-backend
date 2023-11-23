@@ -1,4 +1,7 @@
-﻿using AtletiGo.Core.Messaging.Autenticacao;
+﻿using AtletiGo.Core.Exceptions;
+using AtletiGo.Core.Messaging.Atletica;
+using AtletiGo.Core.Messaging.Autenticacao;
+using AtletiGo.Core.Messaging.Usuario;
 using AtletiGo.Core.Repositories.Usuario;
 using AtletiGo.Core.Services.Autenticacao;
 using AtletiGo.Core.Utils.Enums;
@@ -20,19 +23,26 @@ namespace AtletiGo.Core.Services.Usuario
             _usuarioRepository = usuarioRepository;
         }
 
-        public List<Entities.Usuario> GetAll()
+        public List<GetAllUsuarioResponse> GetAll(Guid codigoUsuario, Guid? codigoAtletica)
         {
-            return _usuarioRepository.GetAll<Entities.Usuario>()?.ToList();
+            var usuario = _usuarioRepository.GetById<Entities.Usuario>(codigoUsuario);
+
+            var result = _usuarioRepository.GetAll<Entities.Usuario>(
+                usuario.TipoUsuario != TipoUsuario.Administrador
+                    ? new { CodigoAtletica = codigoAtletica }
+                    : null);
+
+            return result?.Select(usuario => new GetAllUsuarioResponse(usuario))?.ToList();
         }
 
-        public void CadastrarUsuario (CadastroRequest request, Guid? codigoAtletica = null)
+        public void CadastrarUsuario(CadastroRequest request)
         {
             request.Validar();
 
             var usuario = new Entities.Usuario
             {
                 Codigo = Guid.NewGuid(),
-                CodigoAtletica = codigoAtletica ?? null,
+                CodigoAtletica = null,
                 Nome = request.Nome,
                 Email = request.Email,
                 HashSenha = BC.HashPassword(request.Senha),
@@ -44,23 +54,73 @@ namespace AtletiGo.Core.Services.Usuario
             _usuarioRepository.Insert(usuario);
         }
 
-        public LoginResponse Autenticar(string nome, string senha)
+        public void AtleticaCadastrarUsuario(CadastroUsuarioRequest request, Guid? codigoAtletica)
         {
-            var usuario = _usuarioRepository.GetAll<Entities.Usuario>(new { Nome = nome }).FirstOrDefault();
+            request.Validar();
 
-            if (usuario is null || !BC.Verify(senha, usuario.HashSenha))
+            var usuario = new Entities.Usuario
             {
-                var token = TokenService.GenerateToken(new Entities.Usuario
-                {
-                    Nome = usuario.Nome,
-                    TipoUsuario = Utils.Enums.TipoUsuario.Universitario,
-                    CodigoAtletica = null
-                });
+                Codigo = Guid.NewGuid(),
+                CodigoAtletica = codigoAtletica,
+                Nome = request.Nome,
+                Email = request.Email,
+                HashSenha = BC.HashPassword("1234"),
+                TipoUsuario = request.TipoUsuario,
+                DtCriacao = DateTime.Now,
+                DtAlteracao = DateTime.Now
+            };
 
-                return new LoginResponse(usuario, token);
+            _usuarioRepository.Insert(usuario);
+        }
+
+        public void EditarUsuario(Guid codigo, CadastroUsuarioRequest request)
+        {
+            var usuario = _usuarioRepository.GetById<Entities.Usuario>(codigo);
+
+            if (usuario == null)
+                throw new AtletiGoException("Usuário inválido.");
+
+            usuario.AlterarUsuario(request);
+
+            _usuarioRepository.Update(usuario);
+        }
+
+        public void DesvincularUsuarioAtletica(Guid codigoUsuario)
+        {
+            var usuario = _usuarioRepository.GetById<Entities.Usuario>(codigoUsuario);
+
+            if (usuario == null)
+                throw new AtletiGoException("Usuário inválido.");
+
+            usuario.CodigoAtletica = null;
+            usuario.TipoUsuario = TipoUsuario.Nenhum;
+
+            _usuarioRepository.Update(usuario);
+        }
+
+        public LoginResponse Autenticar(string email, string senha)
+        {
+            var usuario = _usuarioRepository.GetAll<Entities.Usuario>(new { Email = email }).FirstOrDefault();
+
+            if (usuario != null)
+            {
+                var senhaValida = BC.Verify(senha, usuario?.HashSenha);
+
+                if (senhaValida)
+                {
+                    var token = TokenService.GenerateToken(new Entities.Usuario
+                    {
+                        Nome = usuario.Nome,
+                        Codigo = usuario.Codigo,
+                        TipoUsuario = usuario.TipoUsuario,
+                        CodigoAtletica = usuario.CodigoAtletica
+                    });
+
+                    return new LoginResponse(usuario, token);
+                }
             }
 
-            return null;
+            throw new AtletiGoException("Email ou senha inválido.");
         }
     }
 }

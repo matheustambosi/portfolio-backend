@@ -21,7 +21,18 @@ namespace AtletiGo.Core.Entities
 
         [Column("enderecoevento")]
         public string EnderecoEvento { get; set; }
-        public bool MostrarTodos { get; set; }
+
+        [Column("visivelsematletica")]
+        public bool VisivelSemAtletica { get; set; }
+
+        [Column("visivelcomatletica")]
+        public bool VisivelComAtletica { get; set; }
+
+        [Column("visivelatleta")]
+        public bool VisivelAtleta { get; set; }
+
+        [Column("codigomodalidade")]
+        public Guid? CodigoModalidade { get; set; }
 
         [Column("dtcriacao")]
         public DateTime DtCriacao { get; set; }

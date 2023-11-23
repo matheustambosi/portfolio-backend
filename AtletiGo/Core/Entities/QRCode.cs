@@ -17,8 +17,11 @@ namespace AtletiGo.Core.Entities
         [Column("situacao")]
         public Situacao Situacao { get; set; }
 
-        [Column("dtexpiracao")]
-        public DateTime DtExpiracao { get; set; }
+        [Column("descricao")]
+        public string Descricao { get; set; }
+
+        [Column("duracaodias")]
+        public int DuracaoDias { get; set; }
 
         [Column("dtcriacao")]
         public DateTime DtCriacao { get; set; }

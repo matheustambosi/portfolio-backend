@@ -1,5 +1,6 @@
 ﻿using AtletiGo.Core.Exceptions;
 using AtletiGo.Core.Messaging.QRCode;
+using AtletiGo.Core.Messaging.Usuario;
 using AtletiGo.Core.Repositories.QRCode;
 using AtletiGo.Core.Repositories.Usuario;
 using AtletiGo.Core.Utils.Enums;
@@ -25,6 +26,18 @@ namespace AtletiGo.Core.Services.QRCode
             return _qrCodeRepository.GetAll<Entities.QRCode>()?.ToList();
         }
 
+        public List<GetAllQrCodeResponse> GetAll(Guid codigoUsuario, Guid? codigoAtletica)
+        {
+            var usuario = _usuarioRepository.GetById<Entities.Usuario>(codigoUsuario);
+
+            var result = _qrCodeRepository.GetAll<Entities.QRCode>(
+                usuario.TipoUsuario != TipoUsuario.Administrador
+                    ? new { CodigoAtletica = codigoAtletica, Situacao = 1 }
+                    : null);
+
+            return result?.Select(qrCode => new GetAllQrCodeResponse(qrCode))?.ToList();
+        }
+
         public Guid CriarQRCode(CriarQRCodeRequest request, Guid codigoAtletica)
         {
             var qrCode = new Entities.QRCode
@@ -32,7 +45,9 @@ namespace AtletiGo.Core.Services.QRCode
                 Codigo = Guid.NewGuid(),
                 CodigoAtletica = codigoAtletica,
                 DtCriacao = DateTime.Now,
-                DtExpiracao = request.DtExpiracao
+                Descricao = request.Descricao,
+                DuracaoDias = request.DuracaoDias,
+                Situacao = Situacao.Ativo
             };
 
             _qrCodeRepository.Insert(qrCode);
@@ -44,8 +59,14 @@ namespace AtletiGo.Core.Services.QRCode
         {
             var qrcode = _qrCodeRepository.GetById<Entities.QRCode>(codigoQrCode);
 
-            if (qrcode.DtExpiracao < DateTime.Now)
+            if (qrcode is null)
+                throw new AtletiGoException("O QRCode informado não foi encontrado.");
+
+            if (qrcode.DtCriacao.AddDays(qrcode.DuracaoDias) < DateTime.Now)
                 throw new AtletiGoException("O QRCode escaneado já expirou.");
+
+            if (qrcode.Situacao == Situacao.Inativo)
+                throw new AtletiGoException("O QRCode escaneado está inativo.");
 
             var usuario = _usuarioRepository.GetById<Entities.Usuario>(codigoUsuario);
 

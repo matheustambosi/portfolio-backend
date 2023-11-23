@@ -1,4 +1,5 @@
 ﻿using AtletiGo.Core.Exceptions;
+using AtletiGo.Core.Messaging;
 using AtletiGo.Core.Messaging.Autenticacao;
 using AtletiGo.Core.Services.Autenticacao;
 using AtletiGo.Core.Services.Usuario;
@@ -28,7 +29,7 @@ namespace AtletiGo.Controllers
         {
             try
             {
-                var usuario = _usuarioService.Autenticar(request.Usuario, request.Senha);
+                var usuario = _usuarioService.Autenticar(request.Email, request.Senha);
 
                 if (usuario is null)
                     throw new AtletiGoException("Usuário ou senha inválidos");
@@ -37,12 +38,12 @@ namespace AtletiGo.Controllers
             }
             catch (AtletiGoException atEx)
             {
-                return BadRequest(atEx.Message);
+                return BadRequest(ResponseBase.ErroAtletiGo(atEx));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
-                return BadRequest("Erro desconhecido");
+                return BadRequest(ResponseBase.ErroGenerico());
             }
         }
 
@@ -58,12 +59,12 @@ namespace AtletiGo.Controllers
             }
             catch (AtletiGoException atEx)
             {
-                return BadRequest(atEx.Message);
+                return BadRequest(ResponseBase.ErroAtletiGo(atEx));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
-                return BadRequest("Erro desconhecido");
+                return BadRequest(ResponseBase.ErroGenerico());
             }
         }
     }

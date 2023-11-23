@@ -1,5 +1,6 @@
 ﻿using AtletiGo.Core.Entities;
 using AtletiGo.Core.Exceptions;
+using AtletiGo.Core.Messaging;
 using AtletiGo.Core.Messaging.QRCode;
 using AtletiGo.Core.Services.QRCode;
 using AtletiGo.Core.Utils.Enums;
@@ -11,7 +12,7 @@ using System.Collections.Generic;
 
 namespace AtletiGo.Controllers
 {
-    [Authorize(Roles = nameof(TipoUsuario.Representante))]
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class QRCodeController : ControllerBase
@@ -27,20 +28,25 @@ namespace AtletiGo.Controllers
         }
 
         [HttpGet]
-        public ActionResult<List<QRCode>> ListarQRCodes()
+        public ActionResult<List<GetAllQrCodeResponse>> ListarQRCodes()
         {
             try
             {
-                return _qrCodeService.Listar();
+                var codigoUsuario = GetCodigoUsuario();
+                var codigoAtletica = GetCodigoAtletica();
+
+                var response = _qrCodeService.GetAll(codigoUsuario, codigoAtletica);
+
+                return Ok(response);
             }
             catch (AtletiGoException atEx)
             {
-                return BadRequest(atEx.Message);
+                return BadRequest(ResponseBase.ErroAtletiGo(atEx));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
-                return BadRequest("Erro desconhecido");
+                return BadRequest(ResponseBase.ErroGenerico());
             }
         }
 
@@ -51,18 +57,21 @@ namespace AtletiGo.Controllers
             {
                 var codigoAtletica = GetCodigoAtletica();
 
-                var codigoQRCode = _qrCodeService.CriarQRCode(request, codigoAtletica);
+                if (codigoAtletica == null)
+                    throw new AtletiGoException("Atlética inválida.");
+
+                var codigoQRCode = _qrCodeService.CriarQRCode(request, codigoAtletica.Value);
 
                 return Ok(codigoQRCode);
             }
             catch (AtletiGoException atEx)
             {
-                return BadRequest(atEx.Message);
+                return BadRequest(ResponseBase.ErroAtletiGo(atEx));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
-                return BadRequest("Erro desconhecido");
+                return BadRequest(ResponseBase.ErroGenerico());
             }
         }
 
@@ -77,12 +86,12 @@ namespace AtletiGo.Controllers
             }
             catch (AtletiGoException atEx)
             {
-                return BadRequest(atEx.Message);
+                return BadRequest(ResponseBase.ErroAtletiGo(atEx));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
-                return BadRequest("Erro desconhecido");
+                return BadRequest(ResponseBase.ErroGenerico());
             }
         }
     }
