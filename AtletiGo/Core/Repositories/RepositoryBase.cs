@@ -16,6 +16,13 @@ namespace AtletiGo.Core.Repositories
             _connString = configuration.GetConnectionString("Default");
         }
 
+        public IEnumerable<T> Query<T>(string sql, object obj = null) where T : class
+        {
+            using var db = new NpgsqlConnection(_connString);
+
+            return db.Query<T>(sql, obj);
+        }
+
         public IEnumerable<T> GetAll<T>(object obj = null) where T : class
         {
             using var db = new NpgsqlConnection(_connString);
@@ -42,6 +49,13 @@ namespace AtletiGo.Core.Repositories
             using var db = new NpgsqlConnection(_connString);
 
             db.Update<T>(entity);
+        }
+
+        public void Delete<T>(T entity)
+        {
+            using var db = new NpgsqlConnection(_connString);
+
+            db.Delete(entity);
         }
     }
 }

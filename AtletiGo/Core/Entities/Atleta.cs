@@ -16,8 +16,5 @@ namespace AtletiGo.Core.Entities
 
         [Column("codigousuario")]
         public Guid CodigoUsuario { get; set; }
-
-        [Column("situacaoatleta")]
-        public SituacaoAtleta SituacaoAtleta { get; set; }
     }
 }

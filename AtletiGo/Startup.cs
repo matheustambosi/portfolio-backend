@@ -1,8 +1,14 @@
 using AtletiGo.Core.Repositories;
+using AtletiGo.Core.Repositories.Atleta;
 using AtletiGo.Core.Repositories.Atletica;
+using AtletiGo.Core.Repositories.Evento;
+using AtletiGo.Core.Repositories.Modalidade;
 using AtletiGo.Core.Repositories.QRCode;
 using AtletiGo.Core.Repositories.Usuario;
+using AtletiGo.Core.Services.Atleta;
 using AtletiGo.Core.Services.Atletica;
+using AtletiGo.Core.Services.Evento;
+using AtletiGo.Core.Services.Modalidade;
 using AtletiGo.Core.Services.QRCode;
 using AtletiGo.Core.Services.Usuario;
 using AtletiGo.Core.Utils;
@@ -91,14 +97,21 @@ namespace AtletiGo
             });
 
             services.AddTransient<IRepositoryBase, RepositoryBase>();
+
             services.AddTransient<IUsuarioRepository, UsuarioRepository>();
             services.AddTransient<IAtleticaRepository, AtleticaRepository>();
             services.AddTransient<IQRCodeRepository, QRCodeRepository>();
+            services.AddTransient<IModalidadeRepository, ModalidadeRepository>();
+            services.AddTransient<IAtletaRepository, AtletaRepository>();
+            services.AddTransient<IEventoRepository, EventoRepository>();
+
             services.AddTransient<UsuarioService>();
             services.AddTransient<AtleticaService>();
             services.AddTransient<QRCodeService>();
+            services.AddTransient<ModalidadeService>();
+            services.AddTransient<AtletaService>();
+            services.AddTransient<EventoService>();
         }
-
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
