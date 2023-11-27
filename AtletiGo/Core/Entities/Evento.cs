@@ -1,4 +1,6 @@
-﻿using Dapper;
+﻿using AtletiGo.Core.Messaging.Evento;
+using AtletiGo.Core.Utils.Enums;
+using Dapper;
 using System;
 
 namespace AtletiGo.Core.Entities
@@ -31,6 +33,9 @@ namespace AtletiGo.Core.Entities
         [Column("visivelatleta")]
         public bool VisivelAtleta { get; set; }
 
+        [Column("situacao")]
+        public Situacao Situacao { get; set; }
+
         [Column("codigomodalidade")]
         public Guid? CodigoModalidade { get; set; }
 
@@ -39,5 +44,17 @@ namespace AtletiGo.Core.Entities
 
         [Column("dtalteracao")]
         public DateTime DtAlteracao { get; set; }
+
+        public void AlterarEvento(CriarEventoRequest request)
+        {
+            NomeEvento = request.NomeEvento;
+            EnderecoEvento = request.EnderecoEvento;
+            DtEvento = request.DtEvento;
+            Situacao = request.Situacao;
+            VisivelSemAtletica = request.VisivelSemAtletica;
+            VisivelComAtletica = request.VisivelComAtletica;
+            VisivelAtleta = request.VisivelAtleta;
+            CodigoModalidade = request.CodigoModalidade;
+        }
     }
 }

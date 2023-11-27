@@ -1,10 +1,8 @@
 ﻿using AtletiGo.Core.Entities;
 using AtletiGo.Core.Exceptions;
 using AtletiGo.Core.Messaging;
-using AtletiGo.Core.Messaging.Modalidade;
-using AtletiGo.Core.Messaging.RawQueryResult;
-using AtletiGo.Core.Services.Atleta;
-using AtletiGo.Core.Services.Usuario;
+using AtletiGo.Core.Messaging.Evento;
+using AtletiGo.Core.Services.Evento;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -16,29 +14,74 @@ namespace AtletiGo.Controllers
     [Authorize]
     [ApiController]
     [Route("[controller]")]
-    public class AtletaController : ControllerBase
+    public class EventoController : ControllerBase
     {
-        private readonly ILogger<AtletaController> _logger;
+        private readonly ILogger<EventoController> _logger;
 
-        private readonly AtletaService _atletaService;
+        private readonly EventoService _eventoService;
 
-        public AtletaController(ILogger<AtletaController> logger, AtletaService atletaService)
+        public EventoController(ILogger<EventoController> logger, EventoService eventoService)
         {
             _logger = logger;
-            _atletaService = atletaService;
+            _eventoService = eventoService;
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<GetAllAtletasRawQueryResult>> GetAll()
+        public ActionResult<IEnumerable<GetAllEventoResponse>> GetAll()
         {
             try
             {
                 var codigoUsuario = GetCodigoUsuario();
                 var codigoAtletica = GetCodigoAtletica();
 
-                var response = _atletaService.GetAllAtletas(codigoUsuario, codigoAtletica.GetValueOrDefault());
+                var response = _eventoService.GetAllEventos(codigoUsuario, codigoAtletica.GetValueOrDefault());
 
                 return Ok(response);
+            }
+            catch (AtletiGoException atEx)
+            {
+                return BadRequest(ResponseBase.ErroAtletiGo(atEx));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest(ResponseBase.ErroGenerico());
+            }
+        }
+
+        [HttpPost]
+        public IActionResult CriarAtletica(CriarEventoRequest request)
+        {
+            try
+            {
+                var codigoAtletica = GetCodigoAtletica();
+
+                if (codigoAtletica == null)
+                    throw new AtletiGoException("Atlética inválida.");
+
+                _eventoService.CriarEvento(request, codigoAtletica.Value);
+
+                return NoContent();
+            }
+            catch (AtletiGoException atEx)
+            {
+                return BadRequest(ResponseBase.ErroAtletiGo(atEx));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest(ResponseBase.ErroGenerico());
+            }
+        }
+
+        [HttpPut("{codigo}")]
+        public IActionResult Editar([FromBody] CriarEventoRequest request, Guid codigo)
+        {
+            try
+            {
+                _eventoService.EditarEvento(codigo, request);
+
+                return NoContent();
             }
             catch (AtletiGoException atEx)
             {
@@ -57,33 +100,10 @@ namespace AtletiGo.Controllers
             try
             {
                 var codigoUsuario = GetCodigoUsuario();
-                var codigoAtletica = GetCodigoAtletica();
 
-                _atletaService.DesvincularAtletaAtletica(codigo, codigoUsuario, codigoAtletica.GetValueOrDefault());
+                _eventoService.DesativarEvento(codigo, codigoUsuario);
 
                 return NoContent();
-            }
-            catch (AtletiGoException atEx)
-            {
-                return BadRequest(ResponseBase.ErroAtletiGo(atEx));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, ex.Message);
-                return BadRequest(ResponseBase.ErroGenerico());
-            }
-        }
-
-        [HttpPost("SalvarAtleta")]
-        public IActionResult Criar([FromBody] SalvarModalidadeAtletaRequest request)
-        {
-            try
-            {
-                var codigoUsuario = GetCodigoUsuario();
-
-                _atletaService.SalvarModalidadeAtleta(codigoUsuario, request);
-
-                return Ok();
             }
             catch (AtletiGoException atEx)
             {
