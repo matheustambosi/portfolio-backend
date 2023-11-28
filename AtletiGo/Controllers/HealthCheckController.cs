@@ -14,7 +14,7 @@ namespace AtletiGo.Controllers
         public HealthCheckController(ILogger<HealthCheckController> logger, IConfiguration configuration)
         {
             _logger = logger;
-            _connString = configuration.GetValue<string>("Testando");
+            _connString = configuration.GetValue<string>("DefaultConnection");
         }
 
         [HttpGet]
