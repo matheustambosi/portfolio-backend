@@ -9,18 +9,16 @@ namespace AtletiGo.Controllers
     public class HealthCheckController : ControllerBase
     {
         private readonly ILogger<HealthCheckController> _logger;
-        private readonly string _connString;
 
         public HealthCheckController(ILogger<HealthCheckController> logger, IConfiguration configuration)
         {
             _logger = logger;
-            _connString = configuration.GetValue<string>("DefaultConnection");
         }
 
         [HttpGet]
         public IActionResult GetAll()
         {
-            return Ok(_connString);
+            return Ok();
         }
     }
 }
