@@ -13,7 +13,7 @@ namespace AtletiGo.Core.Repositories
 
         public RepositoryBase(IConfiguration configuration)
         {
-            _connString = configuration.GetConnectionString("Default");
+            _connString = configuration.GetConnectionString("Postgre");
         }
 
         public IEnumerable<T> Query<T>(string sql, object obj = null) where T : class
