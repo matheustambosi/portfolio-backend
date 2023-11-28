@@ -1,13 +1,6 @@
-﻿using AtletiGo.Core.Exceptions;
-using AtletiGo.Core.Messaging.Evento;
-using AtletiGo.Core.Messaging;
-using AtletiGo.Core.Services.Evento;
-using AtletiGo.Core.Services.Usuario;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
-using System;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace AtletiGo.Controllers
 {
