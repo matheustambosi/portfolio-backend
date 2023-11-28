@@ -54,12 +54,12 @@ ALTER TABLE IF EXISTS public.evento
 CREATE TABLE IF NOT EXISTS public.modalidade
 (
     codigo uuid NOT NULL,
+    codigoatletica uuid NOT NULL,
     descricao character varying(100) COLLATE pg_catalog."default" NOT NULL,
     buscandoatletas boolean NOT NULL,
     situacao smallint NOT NULL,
     dtcriacao date NOT NULL,
     dtalteracao date NOT NULL,
-    codigoatletica uuid NOT NULL,
     CONSTRAINT modalidade_pkey PRIMARY KEY (codigo)
 )
 
@@ -86,13 +86,13 @@ ALTER TABLE IF EXISTS public.qrcode
 CREATE TABLE IF NOT EXISTS public.usuario
 (
     codigo uuid NOT NULL,
+    codigoatletica uuid,
     nome character varying(200) COLLATE pg_catalog."default" NOT NULL,
     hashsenha character varying(300) COLLATE pg_catalog."default" NOT NULL,
     email character varying(200) COLLATE pg_catalog."default" NOT NULL,
     tipousuario smallint NOT NULL,
     dtcriacao date NOT NULL,
     dtalteracao date NOT NULL,
-    codigoatletica uuid,
     CONSTRAINT usuario_pkey PRIMARY KEY (codigo)
 )
 
