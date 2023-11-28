@@ -67,7 +67,7 @@ namespace AtletiGo.Core.Services.Atleta
 
             foreach (var modalidadesAtivas in request.ModalidadesAtivas)
             {
-                var modalidadeExiste = modalidadesAtuais.Find(modalidadeAtual => modalidadesAtivas == modalidadeAtual.CodigoModalidade);
+                var modalidadeExiste = modalidadesAtuais?.Find(modalidadeAtual => modalidadesAtivas == modalidadeAtual.CodigoModalidade);
 
                 if (modalidadeExiste == null)
                 {
@@ -86,7 +86,7 @@ namespace AtletiGo.Core.Services.Atleta
                 }
             }
 
-            modalidadesAtuais.ForEach(modalidadeAtual => _atletaRepository.Delete(modalidadeAtual));
+            modalidadesAtuais?.ForEach(modalidadeAtual => _atletaRepository.Delete(modalidadeAtual));
         }
     }
 }
