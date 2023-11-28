@@ -71,6 +71,7 @@ namespace AtletiGo.Core.Services.QRCode
             var usuario = _usuarioRepository.GetById<Entities.Usuario>(codigoUsuario);
 
             usuario.CodigoAtletica = qrcode.CodigoAtletica;
+            usuario.TipoUsuario = TipoUsuario.Universitario;
 
             _usuarioRepository.Update(usuario);
         }
