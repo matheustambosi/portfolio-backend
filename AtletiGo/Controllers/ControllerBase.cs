@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using System;
+using AtletiGo.Core.Exceptions;
 
 namespace AtletiGo.Controllers
 {
@@ -20,7 +21,7 @@ namespace AtletiGo.Controllers
             var codigoOperador = User.FindFirstValue("codigo_operador");
             if (codigoOperador == null)
             {
-                throw new Exception("Código do usuário não identificado.");
+                throw new AtletiGoException("Código do usuário não identificado.");
             }
 
             return new Guid(codigoOperador);

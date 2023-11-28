@@ -129,7 +129,7 @@ namespace AtletiGo
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
             SimpleCRUD.SetDialect(SimpleCRUD.Dialect.PostgreSQL);
 
-            //app.UseHttpsRedirection();
+            app.UseHttpsRedirection();
 
             app.UseRouting();
 
