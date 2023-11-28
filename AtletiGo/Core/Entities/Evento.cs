@@ -56,5 +56,19 @@ namespace AtletiGo.Core.Entities
             VisivelAtleta = request.VisivelAtleta;
             CodigoModalidade = request.CodigoModalidade;
         }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null || GetType() != obj.GetType())
+                return false;
+
+            Evento other = (Evento)obj;
+            return Codigo == other.Codigo;
+        }
+
+        public override int GetHashCode()
+        {
+            return Codigo.GetHashCode();
+        }
     }
 }

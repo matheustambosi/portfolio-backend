@@ -40,6 +40,8 @@ namespace AtletiGo.Core.Services.QRCode
 
         public Guid CriarQRCode(CriarQRCodeRequest request, Guid codigoAtletica)
         {
+            request.Validar();
+
             var qrCode = new Entities.QRCode
             {
                 Codigo = Guid.NewGuid(),

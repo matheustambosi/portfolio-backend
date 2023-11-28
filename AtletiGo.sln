@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AtletiGo", "AtletiGo\AtletiGo.csproj", "{E23AE19A-F31A-4C48-B833-8AB101CA2A01}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AtletiGo", "AtletiGo\AtletiGo.csproj", "{E23AE19A-F31A-4C48-B833-8AB101CA2A01}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AtletiGo.Test", "AtletiGo.Test\AtletiGo.Test.csproj", "{9FDD0E65-7BCF-429F-903C-4D0C757CFA39}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{E23AE19A-F31A-4C48-B833-8AB101CA2A01}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E23AE19A-F31A-4C48-B833-8AB101CA2A01}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E23AE19A-F31A-4C48-B833-8AB101CA2A01}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9FDD0E65-7BCF-429F-903C-4D0C757CFA39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9FDD0E65-7BCF-429F-903C-4D0C757CFA39}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9FDD0E65-7BCF-429F-903C-4D0C757CFA39}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9FDD0E65-7BCF-429F-903C-4D0C757CFA39}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

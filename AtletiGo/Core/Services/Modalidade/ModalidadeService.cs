@@ -104,6 +104,13 @@ namespace AtletiGo.Core.Services.Modalidade
             if (modalidade == null)
                 throw new AtletiGoException("Modalidade inválida.");
 
+            var atletas = _atletaRepository.GetAll<Entities.Atleta>(new { CodigoModalidade = modalidade.Codigo }).ToList();
+
+            atletas.ForEach(atleta =>
+            {
+                _atletaRepository.Delete(atleta);
+            });
+
             modalidade.Situacao = Situacao.Inativo;
             modalidade.DtAlteracao = DateTime.Now;
 

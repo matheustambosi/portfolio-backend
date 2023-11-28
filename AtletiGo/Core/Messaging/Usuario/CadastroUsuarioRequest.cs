@@ -1,4 +1,5 @@
-﻿using AtletiGo.Core.Utils.Enums;
+﻿using AtletiGo.Core.Exceptions;
+using AtletiGo.Core.Utils.Enums;
 
 namespace AtletiGo.Core.Messaging.Usuario
 {
@@ -10,7 +11,11 @@ namespace AtletiGo.Core.Messaging.Usuario
 
         public void Validar()
         {
+            if (string.IsNullOrWhiteSpace(Nome))
+                throw new AtletiGoException("Nome é obrigatório");
 
+            if (string.IsNullOrWhiteSpace(Email))
+                throw new AtletiGoException("Email é obrigatório");
         }
     }
 }

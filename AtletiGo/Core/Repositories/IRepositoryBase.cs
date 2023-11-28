@@ -5,6 +5,7 @@ namespace AtletiGo.Core.Repositories
 {
     public interface IRepositoryBase
     {
+        IEnumerable<T> GetAll<T>() where T : class;
         IEnumerable<T> GetAll<T>(object obj = null) where T : class;
         IEnumerable<T> Query<T>(string sql, object obj = null) where T : class;
         T GetById<T>(Guid codigo) where T : class;

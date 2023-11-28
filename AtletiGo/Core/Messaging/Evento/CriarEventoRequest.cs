@@ -1,4 +1,5 @@
-﻿using AtletiGo.Core.Utils.Enums;
+﻿using AtletiGo.Core.Exceptions;
+using AtletiGo.Core.Utils.Enums;
 using System;
 
 namespace AtletiGo.Core.Messaging.Evento
@@ -16,7 +17,8 @@ namespace AtletiGo.Core.Messaging.Evento
 
         public void Validar()
         {
-
+            if (string.IsNullOrWhiteSpace(NomeEvento))
+                throw new AtletiGoException("Nome do evento é obrigatório");
         }
     }
 }

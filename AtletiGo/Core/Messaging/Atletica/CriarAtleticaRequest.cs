@@ -15,6 +15,15 @@ namespace AtletiGo.Core.Messaging.Atletica
         {
             if (string.IsNullOrWhiteSpace(NomeAtletica))
                 throw new AtletiGoException("Nome da atletica é obrigatório.");
+
+            if (string.IsNullOrWhiteSpace(Universidade))
+                throw new AtletiGoException("Universidade é obrigatório.");
+
+            if (string.IsNullOrWhiteSpace(Cidade))
+                throw new AtletiGoException("Cidade é obrigatório.");
+
+            if (string.IsNullOrWhiteSpace(Estado))
+                throw new AtletiGoException("Estado é obrigatório.");
         }
     }
 }

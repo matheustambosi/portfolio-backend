@@ -50,7 +50,7 @@ namespace AtletiGo.Controllers
         }
 
         [HttpPost]
-        public IActionResult CriarAtletica(CriarEventoRequest request)
+        public IActionResult CriarEvento(CriarEventoRequest request)
         {
             try
             {

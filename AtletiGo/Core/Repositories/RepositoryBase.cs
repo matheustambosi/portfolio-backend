@@ -23,6 +23,13 @@ namespace AtletiGo.Core.Repositories
             return db.Query<T>(sql, obj);
         }
 
+        public IEnumerable<T> GetAll<T>() where T : class
+        {
+            using var db = new NpgsqlConnection(_connString);
+
+            return db.GetList<T>();
+        }
+
         public IEnumerable<T> GetAll<T>(object obj = null) where T : class
         {
             using var db = new NpgsqlConnection(_connString);

@@ -7,6 +7,7 @@ using AtletiGo.Core.Utils.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 
 namespace AtletiGo.Core.Services.Evento
 {
@@ -25,7 +26,7 @@ namespace AtletiGo.Core.Services.Evento
 
         public List<GetAllEventoResponse> GetAllEventos(Guid codigoUsuario, Guid codigoAtletica)
         {
-            var eventos = new List<GetAllEventoResponse>();
+            var result = new List<Entities.Evento>();
 
             var usuario = _usuarioRepository.GetById<Entities.Usuario>(codigoUsuario);
 
@@ -34,9 +35,9 @@ namespace AtletiGo.Core.Services.Evento
                     {
                         VisivelSemAtletica = true,
                         Situacao = 1
-                    });
+                    }).ToList();
 
-            eventos.AddRange(eventosSemAtletica.Select(evento => new GetAllEventoResponse(evento)).ToList());
+            result.AddRange(eventosSemAtletica);
 
             if (usuario.CodigoAtletica != null)
             {
@@ -54,9 +55,9 @@ namespace AtletiGo.Core.Services.Evento
                                 CodigoAtletica = codigoAtletica,
                                 VisivelAtleta = true,
                                 Situacao = 1
-                            });
+                            }).ToList();
 
-                        eventos.AddRange(eventosModalidade.Select(evento => new GetAllEventoResponse(evento)).ToList());
+                        result.AddRange(eventosModalidade);
                     });
                 }
 
@@ -68,12 +69,34 @@ namespace AtletiGo.Core.Services.Evento
                         Situacao = 1
                     });
 
-                eventos.AddRange(eventosAtletica.Select(evento => new GetAllEventoResponse(evento)).ToList());
+                result.AddRange(eventosAtletica);
             }
 
-            eventos = eventos.Distinct().ToList();
+            result = result.Distinct().ToList();
 
-            return eventos;
+            var response = new List<GetAllEventoResponse>();
+
+            var eventosAgrupadosPorData = result.GroupBy(evento => evento.DtEvento);
+
+            foreach(var eventoAgrupadoData in eventosAgrupadosPorData)
+            {
+                var dtEvento = new GetAllEventoResponse
+                {
+                    DtEvento = eventoAgrupadoData.Key,
+                    Eventos = new List<GetAllEventoResponseData>()
+                };
+
+                foreach (var eventoData in eventoAgrupadoData)
+                {
+                    var evento = new GetAllEventoResponseData(eventoData);
+
+                    dtEvento.Eventos.Add(evento);
+                }
+
+                response.Add(dtEvento);
+            }
+
+            return response;
         }
 
         public void CriarEvento(CriarEventoRequest request, Guid codigoAtletica)

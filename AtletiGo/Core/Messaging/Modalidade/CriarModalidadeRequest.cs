@@ -1,4 +1,6 @@
-﻿namespace AtletiGo.Core.Messaging.Modalidade
+﻿using AtletiGo.Core.Exceptions;
+
+namespace AtletiGo.Core.Messaging.Modalidade
 {
     public class CriarModalidadeRequest
     {
@@ -7,7 +9,8 @@
 
         public void Validar()
         {
-
+            if (string.IsNullOrWhiteSpace(Descricao))
+                throw new AtletiGoException("Descricao é obrigatório");
         }
     }
 }

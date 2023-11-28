@@ -25,12 +25,14 @@ namespace AtletiGo.Core.Services.Usuario
 
         public List<GetAllUsuarioResponse> GetAll(Guid codigoUsuario, Guid? codigoAtletica)
         {
+            var result = new List<Entities.Usuario>();
+
             var usuario = _usuarioRepository.GetById<Entities.Usuario>(codigoUsuario);
 
-            var result = _usuarioRepository.GetAll<Entities.Usuario>(
-                usuario.TipoUsuario != TipoUsuario.Administrador
-                    ? new { CodigoAtletica = codigoAtletica }
-                    : null);
+            if (usuario.TipoUsuario == TipoUsuario.Administrador)
+                result = _usuarioRepository.GetAll<Entities.Usuario>().ToList();
+            else
+                result = _usuarioRepository.GetAll<Entities.Usuario>(new { CodigoAtletica = codigoAtletica }).ToList();
 
             return result?.Select(usuario => new GetAllUsuarioResponse(usuario))?.ToList();
         }
