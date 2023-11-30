@@ -86,13 +86,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          dotnet tool install --global dotnet-coverage
+          dotnet tool install --global coverlet.console
 
-          .sonar/scanner/dotnet-sonarscanner begin /k:"matheustambosi_portfolio-backend" /o:"matheustambosi" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml
+          .sonar/scanner/dotnet-sonarscanner begin /k:"matheustambosi_portfolio-backend" /o:"matheustambosi" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.cs.opencover.reportsPaths=coverage.xml
 
           dotnet clean
           dotnet build --no-incremental
-          dotnet-coverage collect 'dotnet test -c release --no-build ${{ secrets.TEST_IMPORT_DLL }}' -f xml -o 'coverage.xml'
+          coverlet ${{ TEST_IMPORT_DLL }} --target "dotnet" --targetargs "test --no-build" -f=opencover -o="coverage.xml"
 
           .sonar/scanner/dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
 
