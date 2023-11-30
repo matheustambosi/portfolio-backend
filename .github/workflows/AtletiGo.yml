@@ -85,6 +85,8 @@ jobs:
           dotnet tool install --global JetBrains.dotCover.GlobalTool
 
       - name: Run SonarCloud analysis
+        with:
+          dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
