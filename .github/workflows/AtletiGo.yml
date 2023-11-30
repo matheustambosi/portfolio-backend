@@ -80,6 +80,12 @@ jobs:
           mkdir -p .sonar/scanner
           dotnet tool update dotnet-sonarscanner --tool-path .sonar/scanner
 
+      - name: Install .netCore
+        if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
+        run: |
+          curl -SL -o dotnet-sdk-2.1.805-osx-x64.pkg https://download.visualstudio.microsoft.com/download/pr/2cc12383-7ee8-4c15-b95c-9cfb50076024/174e16da24beee36d7ddc4686bfad60f/dotnet-sdk-2.1.805-osx-x64.pkg
+          sudo installer -pkg dotnet-sdk-2.1.805-osx-x64.pkg -target /
+
       - name: Run SonarCloud analysis
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
