@@ -87,6 +87,8 @@ jobs:
         run: |
           .sonar/scanner/dotnet-sonarscanner begin /k:"matheustambosi_portfolio-backend" /o:"matheustambosi" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml
 
+          dotnet --list-sdks
+
           dotnet tool install --global dotnet-coverage
 
           dotnet clean
