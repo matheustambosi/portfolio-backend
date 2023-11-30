@@ -85,15 +85,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          dotnet tool install --global coverlet.console
-
           .sonar/scanner/dotnet-sonarscanner begin /k:"matheustambosi_portfolio-backend" /o:"matheustambosi" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.cs.opencover.reportsPaths=coverage.xml
 
-          ls
-
           dotnet clean
-          dotnet build --no-incremental
-          coverlet ./AtletiGo.Test/bin/Release/netcoreapp3.1/AtletiGo.Test.dll --target "dotnet" --targetargs "test --no-build" -f=opencover -o="coverage.xml"
+          dotnet build ./AtletiGo.sln
 
           .sonar/scanner/dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
 
