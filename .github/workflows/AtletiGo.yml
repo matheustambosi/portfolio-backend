@@ -87,14 +87,14 @@ jobs:
         run: |
           dotnet tool install --global dotnet-coverage
 
-          dotnet sonarscanner begin /k:"matheustambosi_portfolio-backend"
+          .sonar/scanner/dotnet-sonarscanner begin /k:"matheustambosi_portfolio-backend"
               /o:"matheustambosi"
               /d:sonar.host.url="https://sonarcloud.io"
               /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
               /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml
           dotnet build --no-incremental
           dotnet-coverage collect "dotnet test" -f xml -o "coverage.xml"
-          dotnet sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+          .sonar/scanner/dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
   
   deploy:
     runs-on: ubuntu-latest
