@@ -15,7 +15,6 @@ env:
   SWASHBUCKLE_DOTNET_CORE_VERSION: 3.1
   API_IMPORT_SPECIFICATION_PATH: AtletiGo/publish/swagger.json
   API_IMPORT_DLL: AtletiGo/bin/Release/netcoreapp3.1/AtletiGo.dll
-  TEST_IMPORT_DLL: AtletiGo.Test/bin/Release/netcoreapp3.1/AtletiGo.Test.dll
   API_IMPORT_VERSION: v1
   CONFIGURATION: Release
   DOTNET_CORE_VERSION: 3.1
@@ -90,9 +89,11 @@ jobs:
 
           .sonar/scanner/dotnet-sonarscanner begin /k:"matheustambosi_portfolio-backend" /o:"matheustambosi" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.cs.opencover.reportsPaths=coverage.xml
 
+          ls
+
           dotnet clean
           dotnet build --no-incremental
-          coverlet ${{ TEST_IMPORT_DLL }} --target "dotnet" --targetargs "test --no-build" -f=opencover -o="coverage.xml"
+          coverlet ./AtletiGo.Test/bin/Release/netcoreapp3.1/AtletiGo.Test.dll --target "dotnet" --targetargs "test --no-build" -f=opencover -o="coverage.xml"
 
           .sonar/scanner/dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
 
