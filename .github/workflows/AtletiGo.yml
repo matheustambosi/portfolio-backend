@@ -80,15 +80,20 @@ jobs:
           mkdir -p .sonar/scanner
           dotnet tool update dotnet-sonarscanner --tool-path .sonar/scanner
 
+      - name: Install DotCover
+        run: |
+          dotnet tool install --global JetBrains.dotCover.GlobalTool
+
       - name: Run SonarCloud analysis
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          .sonar/scanner/dotnet-sonarscanner begin /k:"matheustambosi_portfolio-backend" /o:"matheustambosi" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.cs.opencover.reportsPaths=coverage.xml
+          .sonar/scanner/dotnet-sonarscanner begin /k:"matheustambosi_portfolio-backend" /o:"matheustambosi" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.cs.dotcover.reportsPaths=dotCover.Output.html
 
           dotnet clean
-          dotnet build ./AtletiGo.sln
+          dotnet build
+          dotnet dotcover test --dcReportType=HTML
 
           .sonar/scanner/dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
 
