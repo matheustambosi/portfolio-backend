@@ -15,6 +15,7 @@ env:
   SWASHBUCKLE_DOTNET_CORE_VERSION: 3.1
   API_IMPORT_SPECIFICATION_PATH: AtletiGo/publish/swagger.json
   API_IMPORT_DLL: AtletiGo/bin/Release/netcoreapp3.1/AtletiGo.dll
+  TEST_IMPORT_DLL: AtletiGo.Test/bin/Release/netcoreapp3.1/AtletiGo.Test.dll
   API_IMPORT_VERSION: v1
   CONFIGURATION: Release
   DOTNET_CORE_VERSION: 3.1
@@ -85,12 +86,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          dotnet-runtime-3.1.x-win-x64.exe /uninstall /quiet /norestart
           dotnet tool install --global dotnet-coverage
 
           .sonar/scanner/dotnet-sonarscanner begin /k:"matheustambosi_portfolio-backend" /o:"matheustambosi" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml
           dotnet build --no-incremental
-          dotnet-coverage collect "dotnet test" -f xml -o "coverage.xml"
+          dotnet-coverage collect "dotnet test -c release --no-build ${{ secrets.TEST_IMPORT_DLL }}" -f xml -o "coverage.xml"
           .sonar/scanner/dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
   
   deploy:
