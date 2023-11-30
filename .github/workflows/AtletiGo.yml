@@ -92,7 +92,7 @@ jobs:
 
           dotnet clean
           dotnet build --no-incremental
-          dotnet-coverage collect 'dotnet test' -f xml -o 'coverage.xml'
+          dotnet-coverage collect 'dotnet test -c release --no-build ${{ secrets.TEST_IMPORT_DLL }}' -f xml -o 'coverage.xml'
 
           .sonar/scanner/dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
 
