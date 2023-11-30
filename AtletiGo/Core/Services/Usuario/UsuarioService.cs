@@ -41,6 +41,8 @@ namespace AtletiGo.Core.Services.Usuario
         {
             request.Validar();
 
+            ValidarUsuarioExiste(request.Email);
+
             var usuario = new Entities.Usuario
             {
                 Codigo = Guid.NewGuid(),
@@ -60,6 +62,8 @@ namespace AtletiGo.Core.Services.Usuario
         {
             request.Validar();
 
+            ValidarUsuarioExiste(request.Email);
+
             var usuario = new Entities.Usuario
             {
                 Codigo = Guid.NewGuid(),
@@ -73,6 +77,14 @@ namespace AtletiGo.Core.Services.Usuario
             };
 
             _usuarioRepository.Insert(usuario);
+        }
+
+        public void ValidarUsuarioExiste(string email)
+        {
+            var existeUsuario = _usuarioRepository.GetAll<Entities.Usuario>(new { Email = email }).FirstOrDefault();
+
+            if (existeUsuario != null)
+                throw new AtletiGoException("Já existe um usuário cadastrado com o email informado.");
         }
 
         public void EditarUsuario(Guid codigo, CadastroUsuarioRequest request)
