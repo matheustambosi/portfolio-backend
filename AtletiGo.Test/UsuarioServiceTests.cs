@@ -1,4 +1,6 @@
 ﻿using AtletiGo.Core.Entities;
+using AtletiGo.Core.Messaging.Atletica;
+using AtletiGo.Core.Messaging.Autenticacao;
 using AtletiGo.Core.Messaging.Usuario;
 using AtletiGo.Core.Repositories.Atletica;
 using AtletiGo.Core.Repositories.Usuario;
@@ -80,6 +82,87 @@ namespace AtletiGo.Test
             Assert.NotNull(result);
             Assert.IsType<List<GetAllUsuarioResponse>>(result);
             Assert.Equal(usuariosMock.Count, result.Count);
+        }
+
+        [Fact]
+        public void CadastrarUsuario_ValidRequest_CallsRepositoryInsert()
+        {
+            // Arrange
+            var request = new CadastroRequest
+            {
+                Nome = "Teste",
+                Email = "Teste",
+                Senha = "1234",
+                RepeticaoSenha = "1234"
+            };
+
+            // Act
+            _usuarioService.CadastrarUsuario(request);
+
+            // Assert
+            _mockRepository.Verify(repo => repo.Insert(It.IsAny<Usuario>()), Times.Once);
+        }
+
+        [Fact]
+        public void EditarUsuario_Exists_UpdateCalled()
+        {
+            // Arrange
+            var codigo = Guid.NewGuid();
+            var request = new CadastroUsuarioRequest
+            {
+                Nome = "Teste",
+                Email = "Teste",
+                TipoUsuario = TipoUsuario.Universitario
+            };
+
+            var usuario = new Usuario
+            {
+                Codigo = codigo,
+                CodigoAtletica = Guid.NewGuid(),
+                Nome = "Teste",
+                Email = "Teste",
+                TipoUsuario = TipoUsuario.Universitario,
+                HashSenha = "1234",
+                DtCriacao = DateTime.Now,
+                DtAlteracao = DateTime.Now
+            };
+
+            _mockRepository.Setup(repo => repo.GetById<Usuario>(codigo)).Returns(usuario);
+
+            // Act
+            _usuarioService.EditarUsuario(codigo, request);
+
+            // Assert
+            _mockRepository.Verify(repo => repo.Update(usuario), Times.Once);
+        }
+
+        [Fact]
+        public void DesativarUsuario_ExistsAndNotInactive_SetsInactiveAndUpdateCalled()
+        {
+            // Arrange
+            var codigo = Guid.NewGuid();
+            var usuario = new Usuario
+            {
+                Codigo = codigo,
+                CodigoAtletica = Guid.NewGuid(),
+                Nome = "Teste",
+                Email = "Teste",
+                TipoUsuario = TipoUsuario.Universitario,
+                HashSenha = "1234",
+                DtCriacao = DateTime.Now,
+                DtAlteracao = DateTime.Now
+            };
+
+            _mockRepository.Setup(repo => repo.GetById<Usuario>(codigo)).Returns(usuario);
+
+            // Act
+            _usuarioService.DesvincularUsuarioAtletica(codigo);
+
+            // Assert
+            Assert.Equal(TipoUsuario.Nenhum, usuario.TipoUsuario);
+            Assert.Null(usuario.CodigoAtletica);
+
+            _mockRepository.Verify(repo => repo.Update(usuario), Times.Once);
         }
     }
 }
