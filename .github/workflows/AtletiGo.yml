@@ -85,20 +85,10 @@ jobs:
         run: |
           dotnet add package Microsoft.TestPlatform.ObjectModel --version 17.8.0
 
-      - name: Run SonarCloud analysis
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          .sonar/scanner/dotnet-sonarscanner begin /k:"matheustambosi_portfolio-backend" /o:"matheustambosi" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml
-
-          dotnet tool install --global dotnet-coverage
-
-          dotnet clean
-          dotnet build
-          dotnet-coverage collect "dotnet test" -f xml -o "coverage.xml"
-
-          .sonar/scanner/dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   deploy:
     runs-on: ubuntu-latest
