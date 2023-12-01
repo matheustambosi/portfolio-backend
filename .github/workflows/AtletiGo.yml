@@ -80,11 +80,10 @@ jobs:
           mkdir -p .sonar/scanner
           dotnet tool update dotnet-sonarscanner --tool-path .sonar/scanner
 
-      - name: Install .NetCore
+      - name: Install .netCore
         if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
         run: |
-          sudo apt-get install apt-transport-https
-          sudo apt-get install dotnet-sdk-2.1
+          dotnet --info
 
       - name: Run SonarCloud analysis
         env:
@@ -92,8 +91,6 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           .sonar/scanner/dotnet-sonarscanner begin /k:"matheustambosi_portfolio-backend" /o:"matheustambosi" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml
-
-          dotnet --list-sdks
 
           dotnet tool install --global dotnet-coverage
 
