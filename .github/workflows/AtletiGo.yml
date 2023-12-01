@@ -80,11 +80,6 @@ jobs:
           mkdir -p .sonar/scanner
           dotnet tool update dotnet-sonarscanner --tool-path .sonar/scanner
 
-      - name: Install .netCore
-        if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
-        run: |
-          dotnet add package Microsoft.TestPlatform.ObjectModel --version 17.8.0
-
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
         env:
