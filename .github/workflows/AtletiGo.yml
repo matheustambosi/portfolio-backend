@@ -83,6 +83,10 @@ jobs:
       - name: Install .netCore
         if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
         run: |
+          wget -q https://dot.net/v1/dotnet-install.sh
+          chmod +x dotnet-install.sh
+          ./dotnet-install.sh --version 3.1 --install-dir ~/.dotnet
+          export PATH="$PATH:$HOME/.dotnet"
           dotnet --info
 
       - name: Run SonarCloud analysis
