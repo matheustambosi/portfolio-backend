@@ -55,7 +55,6 @@ jobs:
   sonarcloud_analysis:
     name: code coverage analysis
     runs-on: ubuntu-latest
-    needs: build
     steps:
       - name: Build
       run: dotnet build --configuration Release
