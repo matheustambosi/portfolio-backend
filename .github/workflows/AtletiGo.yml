@@ -57,8 +57,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
+      - name: Build
+      run: dotnet build --configuration Release
+
       - name: Run tests and coverage
-      run: dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+        run: |
+          dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
