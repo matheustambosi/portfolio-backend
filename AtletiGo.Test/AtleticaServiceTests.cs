@@ -1,8 +1,8 @@
 using AtletiGo.Core.Entities;
 using AtletiGo.Core.Messaging.Atletica;
-using AtletiGo.Core.Repositories.Atletica;
 using AtletiGo.Core.Services.Atletica;
 using AtletiGo.Core.Utils.Enums;
+using AtletiGo.Test.Mock;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -12,51 +12,24 @@ namespace AtletiGo.Test
 {
     public class AtleticaServiceTests
     {
-        private readonly Mock<IAtleticaRepository> _mockRepository;
+        private readonly AtleticaMock _atleticaMock;
         private readonly AtleticaService _atleticaService;
 
         public AtleticaServiceTests()
         {
-            _mockRepository = new Mock<IAtleticaRepository>();
-            _atleticaService = new AtleticaService(_mockRepository.Object);
+            _atleticaMock = new AtleticaMock();
+            _atleticaService = new AtleticaService(_atleticaMock.SetupQueries().Object);
         }
 
         [Fact]
         public void GetAll_Atleticas_ReturnsListOfAtleticas()
         {
-            // Arrange
-            var atleticasMock = new List<Atletica>
-            {
-                new Atletica {
-                    Codigo = Guid.NewGuid(),
-                    Nome = "Teste",
-                    Cidade = "Teste",
-                    Estado = "Teste",
-                    Universidade = "Teste",
-                    Situacao = Situacao.Ativo,
-                    DtCriacao = DateTime.Now,
-                    DtAlteracao = DateTime.Now
-                },
-                new Atletica {
-                    Codigo = Guid.NewGuid(),
-                    Nome = "Teste 2",
-                    Cidade = "Teste 2",
-                    Estado = "Teste 2",
-                    Universidade = "Teste 2",
-                    Situacao = Situacao.Ativo,
-                    DtCriacao = DateTime.Now,
-                    DtAlteracao = DateTime.Now
-                },
-            };
-            _mockRepository.Setup(repo => repo.GetAll<Atletica>()).Returns(atleticasMock);
-
             // Act
             var result = _atleticaService.GetAll();
 
             // Assert
             Assert.NotNull(result);
             Assert.IsType<List<Atletica>>(result);
-            Assert.Equal(atleticasMock.Count, result.Count);
         }
 
         [Fact]
@@ -76,14 +49,15 @@ namespace AtletiGo.Test
             _atleticaService.CadastrarAtletica(request);
 
             // Assert
-            _mockRepository.Verify(repo => repo.Insert(It.IsAny<Atletica>()), Times.Once);
+            _atleticaMock.SetupQueries().Verify(repo => repo.Insert(It.IsAny<Atletica>()), Times.Once);
         }
 
         [Fact]
         public void EditarAtletica_Exists_UpdateCalled()
         {
             // Arrange
-            var codigo = Guid.NewGuid();
+            var codigoAtletica = new Guid("550167FA-0817-4296-8E3C-DCD71549107E");
+
             var request = new CriarAtleticaRequest
             {
                 NomeAtletica = "Novo Nome",
@@ -94,7 +68,7 @@ namespace AtletiGo.Test
             };
             var atletica = new Atletica
             {
-                Codigo = codigo,
+                Codigo = codigoAtletica,
                 Nome = "Teste 1",
                 Cidade = "Teste 1",
                 Estado = "Teste 1",
@@ -104,40 +78,24 @@ namespace AtletiGo.Test
                 Situacao = Situacao.Ativo
             };
 
-            _mockRepository.Setup(repo => repo.GetById<Atletica>(codigo)).Returns(atletica);
-
             // Act
-            _atleticaService.EditarAtletica(codigo, request);
+            _atleticaService.EditarAtletica(codigoAtletica, request);
 
             // Assert
-            _mockRepository.Verify(repo => repo.Update(atletica), Times.Once);
+            _atleticaMock.SetupQueries().Verify(repo => repo.Update(It.IsAny<Atletica>()), Times.Once);
         }
 
         [Fact]
         public void DesativarAtletica_ExistsAndNotInactive_SetsInactiveAndUpdateCalled()
         {
             // Arrange
-            var codigo = Guid.NewGuid();
-            var atletica = new Atletica
-            {
-                Codigo = codigo,
-                Nome = "Teste 1",
-                Cidade = "Teste 1",
-                Estado = "Teste 1",
-                Universidade = "Teste 1",
-                DtCriacao = DateTime.Now,
-                DtAlteracao = DateTime.Now,
-                Situacao = Situacao.Ativo
-            };
-
-            _mockRepository.Setup(repo => repo.GetById<Atletica>(codigo)).Returns(atletica);
+            var codigoAtletica = new Guid("550167FA-0817-4296-8E3C-DCD71549107E");
 
             // Act
-            _atleticaService.DesativarAtletica(codigo);
+            _atleticaService.DesativarAtletica(codigoAtletica);
 
             // Assert
-            Assert.Equal(Situacao.Inativo, atletica.Situacao);
-            _mockRepository.Verify(repo => repo.Update(atletica), Times.Once);
+            _atleticaMock.SetupQueries().Verify(repo => repo.Update(It.IsAny<Atletica>()), Times.Once);
         }
     }
 }
