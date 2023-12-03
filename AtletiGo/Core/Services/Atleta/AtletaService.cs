@@ -4,6 +4,7 @@ using AtletiGo.Core.Messaging.RawQueryResult;
 using AtletiGo.Core.Repositories.Atleta;
 using AtletiGo.Core.Repositories.Usuario;
 using AtletiGo.Core.Utils.Enums;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,8 +22,10 @@ namespace AtletiGo.Core.Services.Atleta
             _usuarioRepository = usuarioRepository;
         }
 
-        public List<GetAllAtletasRawQueryResult> GetAllAtletas(Guid codigoUsuario, Guid codigoAtletica)
+        public List<GetAllAtletasRawQueryResult> GetAllAtletas(Guid codigoUsuario, Guid? codigoAtletica)
         {
+            List<GetAllAtletasRawQueryResult> result;
+
             var usuario = _usuarioRepository.GetById<Entities.Usuario>(codigoUsuario);
 
             string sql = @$"SELECT
@@ -39,14 +42,23 @@ namespace AtletiGo.Core.Services.Atleta
             string sqlWhere = "";
 
             if (usuario.TipoUsuario != TipoUsuario.Administrador)
+            {
                 sqlWhere += " AND usuario.codigoatletica = @CodigoAtletica";
-
-            var result = _atletaRepository.Query<GetAllAtletasRawQueryResult>(sql + sqlWhere, new { CodigoAtletica = codigoAtletica }).ToList();
+                result = _atletaRepository.Query<GetAllAtletasRawQueryResult>(sql + sqlWhere,
+                    new
+                    {
+                        CodigoAtletica = codigoAtletica
+                    }).ToList();
+            }
+            else
+            {
+                result = _atletaRepository.Query<GetAllAtletasRawQueryResult>(sql + sqlWhere).ToList();
+            }
 
             return result;
         }
 
-        public void DesvincularAtletaAtletica(Guid codigoAtleta, Guid codigoUsuario, Guid codigoAtletica)
+        public void DesvincularAtletaAtletica(Guid codigoAtleta, Guid codigoUsuario, Guid? codigoAtletica)
         {
             var usuario = _usuarioRepository.GetById<Entities.Usuario>(codigoUsuario);
 
