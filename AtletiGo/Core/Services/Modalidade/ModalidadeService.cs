@@ -38,7 +38,7 @@ namespace AtletiGo.Core.Services.Modalidade
             return result?.Select(modalidade => new GetAllModalidadeResponse(modalidade))?.ToList();
         }
 
-        public List<GetAllModalidadesBuscandoAtletasResponse> GetAllModalidadesBuscandoAtletas(Guid codigoUsuario, Guid codigoAtletica)
+        public List<GetAllModalidadesBuscandoAtletasResponse> GetAllModalidadesBuscandoAtletas(Guid codigoUsuario, Guid? codigoAtletica)
         {
             var result = new List<Entities.Modalidade>();
 

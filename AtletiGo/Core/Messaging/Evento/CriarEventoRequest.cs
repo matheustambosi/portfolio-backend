@@ -18,7 +18,10 @@ namespace AtletiGo.Core.Messaging.Evento
         public void Validar()
         {
             if (string.IsNullOrWhiteSpace(NomeEvento))
-                throw new AtletiGoException("Nome do evento é obrigatório");
+                throw new AtletiGoException("Nome do evento é obrigatório.");
+
+            if (string.IsNullOrWhiteSpace(EnderecoEvento))
+                throw new AtletiGoException("Endereço do evento é obrigatório.");
         }
     }
 }

@@ -1,174 +1,81 @@
-﻿using AtletiGo.Core.Messaging.Modalidade;
-using AtletiGo.Core.Repositories.Atleta;
-using AtletiGo.Core.Repositories.Modalidade;
-using AtletiGo.Core.Repositories.Usuario;
+﻿using AtletiGo.Core.Messaging.Usuario;
 using AtletiGo.Core.Services.Modalidade;
-using AtletiGo.Core.Utils.Enums;
-using Microsoft.AspNetCore.Routing;
-using Moq;
+using AtletiGo.Core.Services.Usuario;
+using AtletiGo.Test.Mock;
 using System.Collections.Generic;
 using System;
 using Xunit;
-using AtletiGo.Core.Entities;
-using AtletiGo.Core.Messaging.QRCode;
+using AtletiGo.Core.Messaging.Modalidade;
 
 namespace AtletiGo.Test
 {
     public class ModalidadeServiceTests
     {
-        private readonly Mock<IModalidadeRepository> _mockRepository;
-        private readonly Mock<IAtletaRepository> _mockAtletaRepository;
-        private readonly Mock<IUsuarioRepository> _mockUsuarioRepository;
+        private readonly ModalidadeMock _modalidadeMock;
+        private readonly UsuarioMock _usuarioMock;
+        private readonly AtletaMock _atletaMock;
         private readonly ModalidadeService _modalidadeService;
 
         public ModalidadeServiceTests()
         {
-            _mockRepository = new Mock<IModalidadeRepository>();
-            _mockAtletaRepository = new Mock<IAtletaRepository>();
-            _mockUsuarioRepository = new Mock<IUsuarioRepository>();
-            _modalidadeService = new ModalidadeService(_mockRepository.Object, _mockUsuarioRepository.Object, _mockAtletaRepository.Object);
+            _modalidadeMock = new ModalidadeMock();
+            _usuarioMock = new UsuarioMock();
+            _atletaMock = new AtletaMock();
+            _modalidadeService = new ModalidadeService(_modalidadeMock.SetupQueries().Object, _usuarioMock.SetupQueries().Object, _atletaMock.SetupQueries().Object);
         }
 
         [Fact]
-        public void GetAllModalidadesBuscandoAtletas_ReturnsListOfModalidadesBuscandoAtletas()
+        public void GetAll_PerfilAdministrador_DeveRetornarModalidades()
         {
-            // Arrange
-            var codigoUsuario = Guid.NewGuid();
-            var codigoAtletica = Guid.NewGuid();
-
-            var usuarioMock = new Usuario
-            {
-                Codigo = codigoUsuario,
-                CodigoAtletica = null,
-                Nome = "Teste",
-                Email = "Teste",
-                HashSenha = "Teste",
-                TipoUsuario = TipoUsuario.Administrador,
-                DtCriacao = DateTime.Now,
-                DtAlteracao = DateTime.Now
-            };
-
-            var codigoModalidade = Guid.NewGuid();
-
-            var modalidadesMock = new List<Modalidade>
-            {
-                new Modalidade
-                {
-                    Codigo = codigoModalidade,
-                    CodigoAtletica = codigoAtletica,
-                    BuscandoAtletas = true,
-                    Descricao= "Teste",
-                    Situacao = Situacao.Ativo,
-                    DtCriacao= DateTime.Now,
-                    DtAlteracao = DateTime.Now
-                },
-                new Modalidade
-                {
-                    Codigo = Guid.NewGuid(),
-                    CodigoAtletica = codigoAtletica,
-                    BuscandoAtletas = true,
-                    Descricao= "Teste 2",
-                    Situacao = Situacao.Ativo,
-                    DtCriacao= DateTime.Now,
-                    DtAlteracao = DateTime.Now
-                }
-            };
-
-            var atletasMock = new List<Atleta>
-            {
-                new Atleta
-                {
-                    Codigo= Guid.NewGuid(),
-                    CodigoModalidade = codigoModalidade,
-                    CodigoUsuario = codigoUsuario
-                }
-            };
-
-            _mockUsuarioRepository.Setup(repo => repo.GetById<Usuario>(usuarioMock.Codigo)).Returns(usuarioMock);
-
-            _mockRepository.Setup(repo => repo.GetAll<Modalidade>()).Returns(modalidadesMock);
-
-            _mockAtletaRepository.Setup(repo => repo.GetAll<Atleta>(It.IsAny<object>())).Returns(atletasMock);
+            var codigoUsuario = new Guid("1193EF05-AFFB-4C5C-AE55-629D65708305");
 
             // Act
-            var result = _modalidadeService.GetAllModalidadesBuscandoAtletas(usuarioMock.Codigo, usuarioMock.CodigoAtletica.GetValueOrDefault());
+            var result = _modalidadeService.GetAll(codigoUsuario, null);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.IsType<List<GetAllModalidadeResponse>>(result);
+        }
+
+        [Fact]
+        public void GetAll_PerfilRepresentante_DeveRetornarModalidades()
+        {
+            var codigoUsuario = new Guid("E4548A8B-C881-4DEF-9A49-2A0778B477BF");
+            var codigoAtletica = new Guid("726B36F1-03F9-47BD-ACAA-DDECF0307505");
+
+            // Act
+            var result = _modalidadeService.GetAll(codigoUsuario, codigoAtletica);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.IsType<List<GetAllModalidadeResponse>>(result);
+        }
+
+        [Fact]
+        public void GetAllModalidadesBuscandoAtletas_PerfilAdministrador_DeveRetornarModalidades()
+        {
+            var codigoUsuario = new Guid("1193EF05-AFFB-4C5C-AE55-629D65708305");
+
+            // Act
+            var result = _modalidadeService.GetAllModalidadesBuscandoAtletas(codigoUsuario, null);
 
             // Assert
             Assert.NotNull(result);
             Assert.IsType<List<GetAllModalidadesBuscandoAtletasResponse>>(result);
-            Assert.Equal(modalidadesMock.Count, result.Count);
         }
 
-        //[Fact]
-        //public void CadastrarModalidade_NewModalidade_CreatesModalidade()
-        //{
-        //    // Arrange
-        //    var codigoAtletica = Guid.NewGuid();
-        //    var request = new CriarModalidadeRequest
-        //    {
+        [Fact]
+        public void GetAllModalidadesBuscandoAtletas_PerfilRepresentante_DeveRetornarModalidades()
+        {
+            var codigoUsuario = new Guid("E4548A8B-C881-4DEF-9A49-2A0778B477BF");
+            var codigoAtletica = new Guid("726B36F1-03F9-47BD-ACAA-DDECF0307505");
 
-        //    };
+            // Act
+            var result = _modalidadeService.GetAllModalidadesBuscandoAtletas(codigoUsuario, codigoAtletica);
 
-        //    var modalidadesMock = new List<Modalidade>
-        //    {
-                
-        //    };
-
-        //    _mockRepository.Setup(repo => repo.GetAll<Modalidade>(It.IsAny<object>())).Returns(modalidadesMock);
-
-        //    // Act
-        //    _modalidadeService.CadastrarModalidade(request, codigoAtletica);
-
-        //    // Assert
-        //    _mockRepository.Verify(repo => repo.Insert(It.IsAny<Modalidade>()), Times.Once);
-        //    // Add more assertions based on expected behavior
-        //}
-
-        //[Fact]
-        //public void EditarModalidade_ValidId_EditsModalidade()
-        //{
-        //    // Arrange
-        //    var codigo = Guid.NewGuid();
-        //    var request = new CriarModalidadeRequest(); // Populate request object with necessary data for the test
-        //    var mockModalidade = new Entities.Modalidade(); // Mock modalidade data
-
-        //    _modalidadeRepositoryMock.Setup(repo => repo.GetById<Entities.Modalidade>(codigo))
-        //                             .Returns(mockModalidade);
-
-        //    _modalidadeRepositoryMock.Setup(repo => repo.Update(It.IsAny<Entities.Modalidade>()));
-
-        //    // Act
-        //    _modalidadeService.EditarModalidade(codigo, request);
-
-        //    // Assert
-        //    _modalidadeRepositoryMock.Verify(repo => repo.Update(It.IsAny<Entities.Modalidade>()), Times.Once);
-        //    // Add more assertions based on expected behavior
-        //}
-
-        //[Fact]
-        //public void DeletarModalidadeAtletica_ValidId_DeletesModalidadeAndRelatedAtletas()
-        //{
-        //    // Arrange
-        //    var codigoModalidade = Guid.NewGuid();
-        //    var mockModalidade = new Entities.Modalidade { Codigo = codigoModalidade }; // Mock modalidade data
-        //    var mockAtletas = new List<Entities.Atleta>(); // Mock atletas data
-
-        //    _modalidadeRepositoryMock.Setup(repo => repo.GetById<Entities.Modalidade>(codigoModalidade))
-        //                             .Returns(mockModalidade);
-
-        //    _atletaRepositoryMock.Setup(repo => repo.GetAll<Entities.Atleta>(It.IsAny<object>()))
-        //                         .Returns(mockAtletas);
-
-        //    _atletaRepositoryMock.Setup(repo => repo.Delete(It.IsAny<Entities.Atleta>()));
-        //    _modalidadeRepositoryMock.Setup(repo => repo.Update(It.IsAny<Entities.Modalidade>()));
-
-        //    // Act
-        //    _modalidadeService.DeletarModalidadeAtletica(codigoModalidade);
-
-        //    // Assert
-        //    _atletaRepositoryMock.Verify(repo => repo.Delete(It.IsAny<Entities.Atleta>()), Times.Exactly(mockAtletas.Count));
-        //    _modalidadeRepositoryMock.Verify(repo => repo.Update(It.IsAny<Entities.Modalidade>()), Times.Once);
-        //    // Add more assertions based on expected behavior
-        //}
+            // Assert
+            Assert.NotNull(result);
+            Assert.IsType<List<GetAllModalidadesBuscandoAtletasResponse>>(result);
+        }
     }
 }

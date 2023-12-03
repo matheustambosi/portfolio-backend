@@ -80,7 +80,7 @@ namespace AtletiGo.Core.Services.Usuario
         {
             var existeUsuario = _usuarioRepository.GetAll<Entities.Usuario>(new { Email = email }).FirstOrDefault();
 
-            if (existeUsuario.Email == email)
+            if (existeUsuario?.Email == email)
                 throw new AtletiGoException("Já existe um usuário cadastrado com o email informado.");
         }
 

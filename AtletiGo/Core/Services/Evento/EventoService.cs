@@ -7,7 +7,6 @@ using AtletiGo.Core.Utils.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 
 namespace AtletiGo.Core.Services.Evento
 {
@@ -78,7 +77,7 @@ namespace AtletiGo.Core.Services.Evento
 
             var eventosAgrupadosPorData = result.GroupBy(evento => evento.DtEvento);
 
-            foreach(var eventoAgrupadoData in eventosAgrupadosPorData)
+            foreach (var eventoAgrupadoData in eventosAgrupadosPorData)
             {
                 var dtEvento = new GetAllEventoResponse
                 {
