@@ -21,19 +21,16 @@ namespace AtletiGo.Core.Services.QRCode
             _usuarioRepository = usuarioRepository;
         }
 
-        public List<Entities.QRCode> Listar()
-        {
-            return _qrCodeRepository.GetAll<Entities.QRCode>()?.ToList();
-        }
-
         public List<GetAllQrCodeResponse> GetAll(Guid codigoUsuario, Guid? codigoAtletica)
         {
+            var result = new List<Entities.QRCode>();
+
             var usuario = _usuarioRepository.GetById<Entities.Usuario>(codigoUsuario);
 
-            var result = _qrCodeRepository.GetAll<Entities.QRCode>(
-                usuario.TipoUsuario != TipoUsuario.Administrador
-                    ? new { CodigoAtletica = codigoAtletica, Situacao = 1 }
-                    : null);
+            if (usuario.TipoUsuario == TipoUsuario.Administrador)
+                result = _qrCodeRepository.GetAll<Entities.QRCode>().ToList();
+            else
+                result = _qrCodeRepository.GetAll<Entities.QRCode>(new { CodigoAtletica = codigoAtletica, Situacao = 1 }).ToList();
 
             return result?.Select(qrCode => new GetAllQrCodeResponse(qrCode))?.ToList();
         }

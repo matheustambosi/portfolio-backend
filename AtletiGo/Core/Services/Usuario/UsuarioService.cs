@@ -1,5 +1,4 @@
 ﻿using AtletiGo.Core.Exceptions;
-using AtletiGo.Core.Messaging.Atletica;
 using AtletiGo.Core.Messaging.Autenticacao;
 using AtletiGo.Core.Messaging.Usuario;
 using AtletiGo.Core.Repositories.Usuario;
@@ -8,8 +7,6 @@ using AtletiGo.Core.Utils.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Security.Principal;
 using BC = BCrypt.Net.BCrypt;
 
 namespace AtletiGo.Core.Services.Usuario
@@ -83,7 +80,7 @@ namespace AtletiGo.Core.Services.Usuario
         {
             var existeUsuario = _usuarioRepository.GetAll<Entities.Usuario>(new { Email = email }).FirstOrDefault();
 
-            if (existeUsuario != null)
+            if (existeUsuario.Email == email)
                 throw new AtletiGoException("Já existe um usuário cadastrado com o email informado.");
         }
 

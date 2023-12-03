@@ -4,6 +4,7 @@ using AtletiGo.Core.Repositories.Atleta;
 using AtletiGo.Core.Repositories.Modalidade;
 using AtletiGo.Core.Repositories.Usuario;
 using AtletiGo.Core.Utils.Enums;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,32 +26,37 @@ namespace AtletiGo.Core.Services.Modalidade
 
         public List<GetAllModalidadeResponse> GetAll(Guid codigoUsuario, Guid? codigoAtletica)
         {
+            var result = new List<Entities.Modalidade>();
+
             var usuario = _usuarioRepository.GetById<Entities.Usuario>(codigoUsuario);
 
-            var result = _modalidadeRepository.GetAll<Entities.Modalidade>(
-                usuario.TipoUsuario != TipoUsuario.Administrador
-                    ? new { CodigoAtletica = codigoAtletica, Situacao = 1 }
-                    : null);
+            if (usuario.TipoUsuario == TipoUsuario.Administrador)
+                result = _modalidadeRepository.GetAll<Entities.Modalidade>().ToList();
+            else
+                result = _modalidadeRepository.GetAll<Entities.Modalidade>(new { CodigoAtletica = codigoAtletica, Situacao = 1 }).ToList();
 
             return result?.Select(modalidade => new GetAllModalidadeResponse(modalidade))?.ToList();
         }
 
         public List<GetAllModalidadesBuscandoAtletasResponse> GetAllModalidadesBuscandoAtletas(Guid codigoUsuario, Guid codigoAtletica)
         {
+            var result = new List<Entities.Modalidade>();
+
             var usuario = _usuarioRepository.GetById<Entities.Usuario>(codigoUsuario);
 
-            var modalidades = _modalidadeRepository.GetAll<Entities.Modalidade>(
-                usuario?.TipoUsuario != TipoUsuario.Administrador ?
-                new
+            if (usuario.TipoUsuario == TipoUsuario.Administrador)
+                result = _modalidadeRepository.GetAll<Entities.Modalidade>().ToList();
+            else
+                result = _modalidadeRepository.GetAll<Entities.Modalidade>(new
                 {
                     CodigoAtletica = codigoAtletica,
                     BuscandoAtletas = true,
                     Situacao = 1
-                } : null).ToList();
+                }).ToList();
 
             var modalidadesInscritas = _atletaRepository.GetAll<Entities.Atleta>(new { CodigoUsuario = codigoUsuario }).ToList();
 
-            return modalidades?.Select(modalidade => new GetAllModalidadesBuscandoAtletasResponse(modalidade, modalidadesInscritas))?.ToList();
+            return result?.Select(modalidade => new GetAllModalidadesBuscandoAtletasResponse(modalidade, modalidadesInscritas))?.ToList();
         }
 
         public void CadastrarModalidade(CriarModalidadeRequest request, Guid codigoAtletica)
