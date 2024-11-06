@@ -18,7 +18,7 @@ namespace AtletiGo.Controllers
         [HttpGet]
         public IActionResult GetAll()
         {
-            return Ok();
+            return Ok("Alive");
         }
     }
 }
