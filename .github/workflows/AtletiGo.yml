@@ -12,16 +12,13 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v2
 
-      - name: List Files
-        run: ls -R
-
       - name: Set up .NET
         uses: actions/setup-dotnet@v2
         with:
           dotnet-version: '8.0'
 
       - name: Publish .NET Application
-        run: dotnet publish Atletigo/AtletiGo.csproj -c Release -o output
+        run: dotnet publish ./AtletiGo/AtletiGo.csproj -c Release -o output
 
       - name: Add SSH key
         uses: webfactory/ssh-agent@v0.5.3
