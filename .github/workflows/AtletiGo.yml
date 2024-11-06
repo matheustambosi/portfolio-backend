@@ -18,7 +18,7 @@ jobs:
           dotnet-version: '8.0'
 
       - name: Publish .NET Application
-        run: dotnet publish -c Release -o output
+        run: dotnet publish Atletigo/AtletiGo.csproj -c Release -o output
 
       - name: Add SSH key
         uses: webfactory/ssh-agent@v0.5.3
