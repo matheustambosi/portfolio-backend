@@ -1,0 +1,27 @@
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: database
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  atletigo:
+    image: ${DOCKER_REGISTRY-}atletigo
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 443
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=apicert
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=certificates/aspnetapp.pfx
+
+volumes:
+  postgres_data:
