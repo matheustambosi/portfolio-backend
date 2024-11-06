@@ -102,14 +102,11 @@ builder.Services.AddTransient<EventoService>();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "AtletiGo");
-    });
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "AtletiGo");
+});
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 SimpleCRUD.SetDialect(SimpleCRUD.Dialect.PostgreSQL);
