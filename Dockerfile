@@ -1,14 +1,32 @@
-#See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
-
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER root
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
+RUN apt-get update && \
+    apt-get install -y \
+    git \
+    curl \
+    ca-certificates \
+    lsb-release \
+    sudo \
+    certbot python3-certbot-nginx \
+    gnupg2 && \
+    curl -sSL https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
+    curl -sSL https://packages.microsoft.com/config/debian/10/prod.list > /etc/apt/sources.list.d/microsoft-prod.list && \
+    apt-get update && \
+    apt-get install -y dotnet-sdk-8.0 && \
+    curl -fsSL https://get.docker.com | sh
+
+RUN curl -sSL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose && \
+    chmod +x /usr/local/bin/docker-compose
+
+RUN docker-compose --version
+
 RUN chmod -R 755 /app
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM base AS build
 WORKDIR /src
 COPY ["AtletiGo/AtletiGo.csproj", "AtletiGo/"]
 RUN dotnet restore "AtletiGo/AtletiGo.csproj"
