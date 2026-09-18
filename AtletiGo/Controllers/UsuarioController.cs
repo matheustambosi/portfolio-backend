@@ -62,7 +62,8 @@ namespace AtletiGo.Controllers
             {
                 var codigoAtletica = GetCodigoAtletica();
 
-                _usuarioService.AtleticaCadastrarUsuario(request, codigoAtletica);
+                var actor = _usuarioService.RequireManager(GetCodigoUsuario(), requestedRole: request.TipoUsuario);
+                _usuarioService.AtleticaCadastrarUsuario(request, actor.CodigoAtletica);
 
                 return Ok();
             }
@@ -82,6 +83,7 @@ namespace AtletiGo.Controllers
         {
             try
             {
+                _usuarioService.RequireManager(GetCodigoUsuario(), codigo, request.TipoUsuario);
                 _usuarioService.EditarUsuario(codigo, request);
 
                 return NoContent();
@@ -102,6 +104,7 @@ namespace AtletiGo.Controllers
         {
             try
             {
+                _usuarioService.RequireManager(GetCodigoUsuario(), codigo);
                 _usuarioService.DesvincularUsuarioAtletica(codigo);
 
                 return NoContent();

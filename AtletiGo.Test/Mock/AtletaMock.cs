@@ -40,9 +40,11 @@ namespace AtletiGo.Test.Mock
                         {
                             new GetAllAtletasRawQueryResult
                             {
+                                CodigoUsuario = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
                             },
                             new GetAllAtletasRawQueryResult
                             {
+                                CodigoUsuario = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
                             }
                         });
 

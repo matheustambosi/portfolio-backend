@@ -123,7 +123,7 @@ namespace AtletiGo.Core.Services.Evento
 
         public void EditarEvento(Guid codigo, CriarEventoRequest request)
         {
-            var evento = _usuarioRepository.GetById<Entities.Evento>(codigo);
+            var evento = _eventoRepository.GetById<Entities.Evento>(codigo);
 
             if (evento == null)
                 throw new AtletiGoException("Evento inválido.");

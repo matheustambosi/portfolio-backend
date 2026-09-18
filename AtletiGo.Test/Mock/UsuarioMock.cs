@@ -16,6 +16,10 @@ namespace AtletiGo.Test.Mock
 
         public Mock<IUsuarioRepository> SetupQueries()
         {
+            _mock.Setup(repo => repo.Register(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns((string name, string email, string password) => new Usuario { Codigo = Guid.NewGuid(), Nome = name, Email = email, TipoUsuario = TipoUsuario.Nenhum });
+            _mock.Setup(repo => repo.Register(It.IsAny<string>(), "Teste", It.IsAny<string>()))
+                .Throws(new AtletiGo.Core.Exceptions.AtletiGoException("Já existe um usuário cadastrado com o email informado."));
             //Mock - Administrador
             _mock.Setup(repo => repo.GetById<Usuario>(new Guid("1193EF05-AFFB-4C5C-AE55-629D65708305")))
                 .Returns(new Usuario
@@ -35,7 +39,7 @@ namespace AtletiGo.Test.Mock
                 {
                     new Usuario
                     {
-                        Codigo = Guid.NewGuid(),
+                        Codigo = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
                         CodigoAtletica = Guid.NewGuid(),
                         Nome = "Teste",
                         Email = "Teste",

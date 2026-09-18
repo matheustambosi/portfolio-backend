@@ -6,7 +6,7 @@ using System;
 
 namespace AtletiGo.Core.Entities
 {
-    [Table("usuario")]
+    // Projection of Core's user; never persist this type in the Atletigo database.
     public class Usuario
     {
         [Key]
@@ -19,7 +19,7 @@ namespace AtletiGo.Core.Entities
         [Column("nome")]
         public string Nome { get; set; }
 
-        [Column("hashsenha")]
+        [System.Text.Json.Serialization.JsonIgnore]
         public string HashSenha { get; set; }
 
         [Column("email")]

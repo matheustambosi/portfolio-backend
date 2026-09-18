@@ -24,37 +24,18 @@ namespace AtletiGo.Core.Services.Atleta
 
         public List<GetAllAtletasRawQueryResult> GetAllAtletas(Guid codigoUsuario, Guid? codigoAtletica)
         {
-            List<GetAllAtletasRawQueryResult> result;
-
             var usuario = _usuarioRepository.GetById<Entities.Usuario>(codigoUsuario);
-
-            string sql = @$"SELECT
-	                            atleta.codigo AS CodigoAtleta,
-	                            usuario.nome AS NomeAtleta,
-	                            modalidade.descricao AS Modalidade
-                            FROM atleta atleta
-                                LEFT JOIN usuario usuario
-	                                ON usuario.codigo = atleta.codigousuario
-                                LEFT JOIN modalidade modalidade
-	                                ON modalidade.codigo = atleta.codigomodalidade
-                            WHERE 1 = 1 ";
-
-            string sqlWhere = "";
-
-            if (usuario.TipoUsuario != TipoUsuario.Administrador)
-            {
-                sqlWhere += " AND usuario.codigoatletica = @CodigoAtletica";
-                result = _atletaRepository.Query<GetAllAtletasRawQueryResult>(sql + sqlWhere,
-                    new
-                    {
-                        CodigoAtletica = codigoAtletica
-                    }).ToList();
-            }
-            else
-            {
-                result = _atletaRepository.Query<GetAllAtletasRawQueryResult>(sql + sqlWhere).ToList();
-            }
-
+            var users = (usuario.TipoUsuario == TipoUsuario.Administrador
+                ? _usuarioRepository.GetAll<Entities.Usuario>()
+                : _usuarioRepository.GetAll<Entities.Usuario>(new { CodigoAtletica = usuario.CodigoAtletica }))
+                .ToDictionary(u => u.Codigo);
+            if (users.Count == 0) return new List<GetAllAtletasRawQueryResult>();
+            var result = _atletaRepository.Query<GetAllAtletasRawQueryResult>(@"
+                SELECT atleta.codigo AS CodigoAtleta, atleta.codigousuario AS CodigoUsuario,
+                       modalidade.descricao AS Modalidade
+                FROM atleta LEFT JOIN modalidade ON modalidade.codigo = atleta.codigomodalidade
+                WHERE atleta.codigousuario = ANY(@UserIds)", new { UserIds = users.Keys.ToArray() }).ToList();
+            foreach (var row in result) row.NomeAtleta = users[row.CodigoUsuario].Nome;
             return result;
         }
 

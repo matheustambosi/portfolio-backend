@@ -21,6 +21,8 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using Dapper;
 using System;
+using Microsoft.Extensions.Configuration;
+using AtletiGo.Core.Services.Autenticacao;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,7 +32,30 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-var key = Encoding.ASCII.GetBytes(Settings.Secret);
+var jwtKey = builder.Configuration["CoreAuth:JwtKey"];
+var issuer = builder.Configuration["CoreAuth:Issuer"];
+var audience = builder.Configuration["CoreAuth:Audience"] ?? "atletigo";
+if (Encoding.UTF8.GetByteCount(jwtKey ?? "") < 32 || string.IsNullOrWhiteSpace(issuer))
+    throw new InvalidOperationException("Configure CoreAuth:JwtKey and CoreAuth:Issuer using the Core JWT settings.");
+var key = Encoding.UTF8.GetBytes(jwtKey);
+builder.Services.AddHttpClient<CoreAuthClient>(client =>
+{
+    var url = builder.Configuration["CoreAuth:BaseUrl"] ?? throw new InvalidOperationException("CoreAuth:BaseUrl is required.");
+    var uri = new Uri(url.TrimEnd('/') + "/");
+    if (uri.Scheme != "https" && !(builder.Environment.IsDevelopment() && uri.IsLoopback))
+        throw new InvalidOperationException("CoreAuth:BaseUrl must use HTTPS.");
+    var apiKey = builder.Configuration["CoreAuth:ApiKey"];
+    if (string.IsNullOrEmpty(apiKey) || apiKey.Length < 32) throw new InvalidOperationException("CoreAuth:ApiKey is required (at least 32 characters).");
+    client.BaseAddress = uri;
+    client.Timeout = TimeSpan.FromSeconds(20);
+    client.DefaultRequestHeaders.Add("X-Project-Origin", "atletigo");
+    client.DefaultRequestHeaders.Add("X-Project-Key", apiKey);
+});
+builder.Services.AddAuthorization(options =>
+{
+    options.DefaultPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser().RequireClaim("origin", "atletigo").RequireClaim("codigo_operador").Build();
+});
 
 builder.Services
     .AddAuthentication(x =>
@@ -40,14 +65,21 @@ builder.Services
     })
     .AddJwtBearer(x =>
     {
-        x.RequireHttpsMetadata = false;
+        x.MapInboundClaims = false;
         x.SaveToken = true;
         x.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(key),
-            ValidateIssuer = false,
-            ValidateAudience = false
+            ValidateIssuer = true,
+            ValidIssuer = issuer,
+            ValidateAudience = true,
+            ValidAudience = audience,
+            ValidateLifetime = true,
+            ValidAlgorithms = new[] { SecurityAlgorithms.HmacSha256 },
+            NameClaimType = "name",
+            RoleClaimType = "role",
+            ClockSkew = TimeSpan.FromSeconds(30)
         };
     });
 
@@ -120,7 +152,7 @@ app.UseCors(x => x
     .AllowAnyMethod()
     .AllowAnyHeader());
 
-app.UseAuthorization();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

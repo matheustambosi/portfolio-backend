@@ -83,20 +83,5 @@ TABLESPACE pg_default;
 ALTER TABLE IF EXISTS public.qrcode
     OWNER to postgres;
 	
-CREATE TABLE IF NOT EXISTS public.usuario
-(
-    codigo uuid NOT NULL,
-    codigoatletica uuid,
-    nome character varying(200) COLLATE pg_catalog."default" NOT NULL,
-    hashsenha character varying(300) COLLATE pg_catalog."default" NOT NULL,
-    email character varying(200) COLLATE pg_catalog."default" NOT NULL,
-    tipousuario smallint NOT NULL,
-    dtcriacao date NOT NULL,
-    dtalteracao date NOT NULL,
-    CONSTRAINT usuario_pkey PRIMARY KEY (codigo)
-)
-
-TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS public.usuario
-    OWNER to postgres;
+-- Users and password hashes live exclusively in core.public.users.
+-- atleta.codigousuario stores the central UUID; no cross-database foreign key.

@@ -66,7 +66,7 @@ namespace AtletiGo.Test
             _usuarioService.CadastrarUsuario(request);
 
             // Assert
-            _usuarioMock.SetupQueries().Verify(repo => repo.Insert(It.IsAny<Usuario>()), Times.Once);
+            _usuarioMock.SetupQueries().Verify(repo => repo.Register(request.Nome, request.Email, request.Senha), Times.Once);
         }
 
         [Fact]
@@ -181,6 +181,7 @@ namespace AtletiGo.Test
             {
                 Nome = "Teste",
                 Email = "Universitario@gmail.com",
+                Senha = "test-password",
                 TipoUsuario = TipoUsuario.Universitario
             };
 
@@ -188,7 +189,8 @@ namespace AtletiGo.Test
             _usuarioService.AtleticaCadastrarUsuario(request, codigoAtletica);
 
             // Assert
-            _usuarioMock.SetupQueries().Verify(repo => repo.Insert(It.IsAny<Usuario>()), Times.Once);
+            _usuarioMock.SetupQueries().Verify(repo => repo.Register(request.Nome, request.Email, request.Senha), Times.Once);
+            _usuarioMock.SetupQueries().Verify(repo => repo.Update(It.Is<Usuario>(u => u.CodigoAtletica == codigoAtletica && u.TipoUsuario == TipoUsuario.Universitario)), Times.Once);
         }
 
         [Fact]
@@ -237,6 +239,7 @@ namespace AtletiGo.Test
             {
                 Nome = "Teste",
                 Email = "Teste",
+                Senha = "test-password",
                 TipoUsuario = TipoUsuario.Universitario
             };
 

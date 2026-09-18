@@ -1,137 +1,74 @@
-﻿using AtletiGo.Core.Exceptions;
+using AtletiGo.Core.Exceptions;
 using AtletiGo.Core.Messaging.Autenticacao;
 using AtletiGo.Core.Messaging.Usuario;
 using AtletiGo.Core.Repositories.Usuario;
-using AtletiGo.Core.Services.Autenticacao;
 using AtletiGo.Core.Utils.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using BC = BCrypt.Net.BCrypt;
 
-namespace AtletiGo.Core.Services.Usuario
+namespace AtletiGo.Core.Services.Usuario;
+
+public class UsuarioService(IUsuarioRepository users)
 {
-    public class UsuarioService
+    public List<GetAllUsuarioResponse> GetAll(Guid codigoUsuario, Guid? codigoAtletica)
     {
-        private readonly IUsuarioRepository _usuarioRepository;
-
-        public UsuarioService(IUsuarioRepository usuarioRepository)
+        var actor = users.GetById<Entities.Usuario>(codigoUsuario);
+        if (actor.TipoUsuario is not (TipoUsuario.Administrador or TipoUsuario.Representante))
+            throw new AtletiGoException("Sem permissao para listar usuarios.");
+        var result = actor.TipoUsuario == TipoUsuario.Administrador ? users.GetAll<Entities.Usuario>()
+            : users.GetAll<Entities.Usuario>(new { CodigoAtletica = actor.CodigoAtletica });
+        return result.Select(u => new GetAllUsuarioResponse(u)).ToList();
+    }
+    public void CadastrarUsuario(CadastroRequest request)
+    {
+        request.Validar();
+        users.Register(request.Nome, request.Email, request.Senha);
+    }
+    public void AtleticaCadastrarUsuario(CadastroUsuarioRequest request, Guid? codigoAtletica)
+    {
+        request.Validar();
+        if (string.IsNullOrEmpty(request.Senha) || request.Senha.Length < 8)
+            throw new AtletiGoException("Informe uma senha com pelo menos 8 caracteres.");
+        var user = users.Register(request.Nome, request.Email, request.Senha);
+        if (user.TipoUsuario != TipoUsuario.Nenhum || user.CodigoAtletica != null)
+            throw new AtletiGoException("Usuario ja vinculado. Use a edicao autorizada da conta.");
+        user.TipoUsuario = request.TipoUsuario;
+        user.CodigoAtletica = codigoAtletica;
+        users.Update(user);
+    }
+    public void ValidarUsuarioExiste(string email)
+    {
+        if (users.GetAll<Entities.Usuario>(new { Email = email }).Any())
+            throw new AtletiGoException("Ja existe um usuario cadastrado com o email informado.");
+    }
+    public void EditarUsuario(Guid codigo, CadastroUsuarioRequest request)
+    {
+        var user = users.GetById<Entities.Usuario>(codigo) ?? throw new AtletiGoException("Usuário inválido.");
+        request.Validar();
+        user.AlterarUsuario(request);
+        users.Update(user);
+    }
+    public void DesvincularUsuarioAtletica(Guid codigoUsuario)
+    {
+        var user = users.GetById<Entities.Usuario>(codigoUsuario) ?? throw new AtletiGoException("Usuário inválido.");
+        user.CodigoAtletica = null;
+        user.TipoUsuario = TipoUsuario.Nenhum;
+        users.Update(user);
+    }
+    public LoginResponse Autenticar(string email, string senha) => users.Login(email, senha);
+    public Entities.Usuario RequireManager(Guid actorId, Guid? targetId = null, TipoUsuario? requestedRole = null)
+    {
+        var actor = users.GetById<Entities.Usuario>(actorId);
+        if (actor.TipoUsuario == TipoUsuario.Administrador) return actor;
+        if (actor.TipoUsuario != TipoUsuario.Representante || actor.CodigoAtletica == null || requestedRole == TipoUsuario.Administrador)
+            throw new AtletiGoException("Sem permissao para gerenciar usuarios.");
+        if (targetId.HasValue)
         {
-            _usuarioRepository = usuarioRepository;
+            var target = users.GetById<Entities.Usuario>(targetId.Value);
+            if (target.CodigoAtletica != actor.CodigoAtletica || target.TipoUsuario == TipoUsuario.Administrador)
+                throw new AtletiGoException("Usuario pertence a outra atletica.");
         }
-
-        public List<GetAllUsuarioResponse> GetAll(Guid codigoUsuario, Guid? codigoAtletica)
-        {
-            var result = new List<Entities.Usuario>();
-
-            var usuario = _usuarioRepository.GetById<Entities.Usuario>(codigoUsuario);
-
-            if (usuario.TipoUsuario == TipoUsuario.Administrador)
-                result = _usuarioRepository.GetAll<Entities.Usuario>().ToList();
-            else
-                result = _usuarioRepository.GetAll<Entities.Usuario>(new { CodigoAtletica = codigoAtletica }).ToList();
-
-            return result?.Select(usuario => new GetAllUsuarioResponse(usuario))?.ToList();
-        }
-
-        public void CadastrarUsuario(CadastroRequest request)
-        {
-            request.Validar();
-
-            ValidarUsuarioExiste(request.Email);
-
-            var usuario = new Entities.Usuario
-            {
-                Codigo = Guid.NewGuid(),
-                CodigoAtletica = null,
-                Nome = request.Nome,
-                Email = request.Email,
-                HashSenha = BC.HashPassword(request.Senha),
-                TipoUsuario = TipoUsuario.Nenhum,
-                DtCriacao = DateTime.Now,
-                DtAlteracao = DateTime.Now
-            };
-
-            _usuarioRepository.Insert(usuario);
-        }
-
-        public void AtleticaCadastrarUsuario(CadastroUsuarioRequest request, Guid? codigoAtletica)
-        {
-            request.Validar();
-
-            ValidarUsuarioExiste(request.Email);
-
-            var usuario = new Entities.Usuario
-            {
-                Codigo = Guid.NewGuid(),
-                CodigoAtletica = codigoAtletica,
-                Nome = request.Nome,
-                Email = request.Email,
-                HashSenha = BC.HashPassword("1234"),
-                TipoUsuario = request.TipoUsuario,
-                DtCriacao = DateTime.Now,
-                DtAlteracao = DateTime.Now
-            };
-
-            _usuarioRepository.Insert(usuario);
-        }
-
-        public void ValidarUsuarioExiste(string email)
-        {
-            var existeUsuario = _usuarioRepository.GetAll<Entities.Usuario>(new { Email = email }).FirstOrDefault();
-
-            if (existeUsuario?.Email == email)
-                throw new AtletiGoException("Já existe um usuário cadastrado com o email informado.");
-        }
-
-        public void EditarUsuario(Guid codigo, CadastroUsuarioRequest request)
-        {
-            var usuario = _usuarioRepository.GetById<Entities.Usuario>(codigo);
-
-            if (usuario == null)
-                throw new AtletiGoException("Usuário inválido.");
-
-            usuario.AlterarUsuario(request);
-
-            _usuarioRepository.Update(usuario);
-        }
-
-        public void DesvincularUsuarioAtletica(Guid codigoUsuario)
-        {
-            var usuario = _usuarioRepository.GetById<Entities.Usuario>(codigoUsuario);
-
-            if (usuario == null)
-                throw new AtletiGoException("Usuário inválido.");
-
-            usuario.CodigoAtletica = null;
-            usuario.TipoUsuario = TipoUsuario.Nenhum;
-
-            _usuarioRepository.Update(usuario);
-        }
-
-        public LoginResponse Autenticar(string email, string senha)
-        {
-            var usuario = _usuarioRepository.GetAll<Entities.Usuario>(new { Email = email }).FirstOrDefault();
-
-            if (usuario != null)
-            {
-                var senhaValida = BC.Verify(senha, usuario?.HashSenha);
-
-                if (senhaValida)
-                {
-                    var token = TokenService.GenerateToken(new Entities.Usuario
-                    {
-                        Nome = usuario.Nome,
-                        Codigo = usuario.Codigo,
-                        TipoUsuario = usuario.TipoUsuario,
-                        CodigoAtletica = usuario.CodigoAtletica
-                    });
-
-                    return new LoginResponse(usuario, token);
-                }
-            }
-
-            throw new AtletiGoException("Email ou senha inválido.");
-        }
+        return actor;
     }
 }
